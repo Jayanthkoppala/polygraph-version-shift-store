@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Northbound Market — Aster Noise-Cancelling Headphones (v2)</title>
+    <meta name="description" content="Northbound Market product detail page fixture version 2." />
+    <meta name="fixture-source" content="versions/v2.html" />
+    <meta name="fixture-version" content="v2" />
+    <meta name="fixture-sku" content="SKU-ASTER-001" />
+    <meta name="fixture-price" content="£51.77" />
+    <meta name="fixture-signer" content="NORTHBOUND-ASTER-FIXTURE" />
+    <style>
+      :root {
+        --bg: #0f172a;
+        --paper: rgba(15, 23, 42, 0.86);
+        --line: rgba(148, 163, 184, 0.22);
+        --title: #f8fafc;
+        --chip: rgba(226, 232, 240, 0.16);
+        --muted: #cbd5e1;
+        --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: var(--title);
+        min-height: 100%;
+        background:
+          radial-gradient(circle at 12% 20%, rgba(148, 163, 184, 0.18) 0%, transparent 50%),
+          radial-gradient(circle at 86% 10%, rgba(255, 238, 248, 0.2) 0%, transparent 40%),
+          linear-gradient(160deg, #0b1220 0%, #111827 45%, #0b1220 100%);
+      }
+      body {
+        min-height: 100vh;
+        padding: 42px 16px;
+        display: grid;
+        place-items: center;
+      }
+      .page {
+        width: min(1024px, 100%);
+        border: 1px solid var(--line);
+        border-radius: 30px;
+        background: linear-gradient(170deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.82));
+        padding: clamp(20px, 4vw, 40px);
+      }
+      .badge {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        font: 700 11px var(--mono);
+        color: #cbd5e1;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+      .layout {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+      }
+      .cover {
+        min-height: 370px;
+        border-radius: 20px;
+        border: 1px solid #334155;
+        background:
+          linear-gradient(120deg, rgba(56, 189, 248, 0.2), rgba(99, 102, 241, 0.16)),
+          radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.25), transparent 45%);
+        position: relative;
+      }
+      .cover::before {
+        content: "";
+        position: absolute;
+        inset: 12%;
+        border: 1px solid rgba(226, 232, 240, 0.4);
+        border-radius: 20px;
+      }
+      .cover::after {
+        content: "Aster";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        font-weight: 800;
+        letter-spacing: 0.35em;
+        transform: translate(-50%, -50%);
+        color: rgba(248, 250, 252, 0.62);
+      }
+      h1 {
+        margin: 10px 0 0;
+        font-size: clamp(30px, 4vw, 48px);
+        line-height: 1.05;
+      }
+      .story {
+        margin-top: 14px;
+        color: #dbe3ee;
+        line-height: 1.6;
+      }
+      .pill {
+        margin-top: 18px;
+        display: inline-flex;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: var(--chip);
+        font: 600 12px var(--mono);
+      }
+      .value {
+        margin-top: 20px;
+        padding: 16px;
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.38);
+        background: rgba(2, 6, 23, 0.55);
+      }
+      .value-label {
+        display: block;
+        text-transform: uppercase;
+        font: 700 10px var(--mono);
+        color: #94a3b8;
+        letter-spacing: 0.14em;
+        margin-bottom: 6px;
+      }
+      .value-amount {
+        font-size: 34px;
+        font-weight: 800;
+        margin: 0;
+      }
+      .evidence {
+        margin-top: 18px;
+        border-top: 1px solid rgba(148, 163, 184, 0.3);
+        padding-top: 14px;
+        color: #94a3b8;
+        font: 600 11px var(--mono);
+      }
+      .evidence strong { color: #f8fafc; font-weight: 700; }
+      @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <p class="badge">Northbound Market · Fixture Product</p>
+      <div class="layout">
+        <section class="cover" aria-hidden="true"></section>
+        <section>
+          <h1>Aster Noise-Cancelling Headphones</h1>
+          <p class="story">Same product identity, same brand, same price. A structure refactor keeps the layout and marketing language modern while breaking legacy price selectors.</p>
+          <div class="pill">SKU: <span data-sku>SKU-ASTER-001</span></div>
+          <div class="value">
+            <span class="value-label">Current listed price</span>
+            <p class="current-cash">
+              <span class="money-widget__value" aria-label="product amount">£51.77</span>
+            </p>
+          </div>
+          <div class="pill">Legacy selector removed</div>
+        </section>
+      </div>
+      <footer class="evidence">
+        <div><span>Source:</span> <strong>v2.html</strong></div>
+        <div><span>Version:</span> <strong>v2</strong></div>
+        <div><span>SKU:</span> <strong>SKU-ASTER-001</strong></div>
+        <div><span>Price:</span> <strong>£51.77</strong></div>
+        <div><span>Version signature:</span> <strong>rev=0002</strong></div>
+      </footer>
+    </main>
+  </body>
+</html>
