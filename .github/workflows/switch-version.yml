@@ -1,10 +1,12 @@
 name: switch-version
 
+run-name: Publish ${{ inputs.version }} · generation ${{ inputs.generation }}
+
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Target fixture version to publish"
+        description: Target fixture version
         required: true
         default: v1
         type: choice
@@ -12,85 +14,181 @@ on:
           - v1
           - v2
       generation:
-        description: "Generation number (auto if omitted)"
+        description: Positive integer greater than the live generation
+        required: true
+        type: string
+      mission_id:
+        description: Polygraph mission identifier
+        required: true
+        type: string
+      force:
+        description: Publish even if this exact marker is already live
         required: false
-        default: "auto"
+        default: false
+        type: boolean
+
+concurrency:
+  group: fixture-production-switch
+  cancel-in-progress: false
 
 jobs:
-  switch:
+  publish:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      actions: read
-    if: github.event_name == 'workflow_dispatch'
+    env:
+      TARGET_VERSION: ${{ inputs.version }}
+      TARGET_GENERATION: ${{ inputs.generation }}
+      MISSION_ID: ${{ inputs.mission_id }}
+      FORCE_PUBLISH: ${{ inputs.force }}
+      LIVE_URL: ${{ vars.POLYGRAPH_FIXTURE_URL }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out the production branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 10
 
-      - name: Validate version input
-        run: |
-          if [[ "${{ inputs.version }}" != "v1" && "${{ inputs.version }}" != "v2" ]]; then
-            echo "Unsupported version: ${{ inputs.version }}"
-            exit 1
-          fi
-
-      - name: Sync fixture index and version manifest
-        id: sync
-        env:
-          TARGET_VERSION: ${{ inputs.version }}
-          TARGET_GENERATION: ${{ inputs.generation }}
-        run: |
-          set -eu
-          SOURCE_FILE="versions/${TARGET_VERSION}.html"
-
-          if [ ! -f "$SOURCE_FILE" ]; then
-            echo "Source file not found: $SOURCE_FILE"
-            exit 1
-          fi
-
-          cp "$SOURCE_FILE" "index.html"
-          ls -la "index.html" "version.json"
-
-          PREV_GEN=0
-          if [ -f version.json ]; then
-            PREV_GEN=$(node -e "const fs=require('fs');const j=JSON.parse(fs.readFileSync('version.json','utf8'));process.stdout.write(String(j.generation||0));")
-          fi
-
-          if [ "$TARGET_GENERATION" = "auto" ] || [ -z "$TARGET_GENERATION" ]; then
-            NEW_GEN=$((PREV_GEN + 1))
-          else
-            NEW_GEN="$TARGET_GENERATION"
-          fi
-
-          export NEW_GEN
-          export SRC_SHA=$(git rev-parse HEAD:${SOURCE_FILE})
-          export NOW=$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)
-          export COMMITS=$(node -e "const child_process=require('child_process');const raw=child_process.execSync('git log --pretty=format:%H -n 5').toString().trim();process.stdout.write(JSON.stringify(raw?raw.split('\\n').filter(Boolean):[]));")
-          NODE_ENV=production node - <<'EOF'
-            const fs=require('fs');
-            const manifest = JSON.parse(fs.readFileSync('version.json', 'utf8'));
-            manifest.version = process.env.TARGET_VERSION;
-            manifest.generation = Number(process.env.NEW_GEN);
-            manifest.source_sha = process.env.SRC_SHA;
-            manifest.published_at = process.env.NOW;
-            manifest.source = `versions/${process.env.TARGET_VERSION}.html`;
-            manifest.commits = process.env.COMMITS ? JSON.parse(process.env.COMMITS) : [];
-            manifest.source_sha = process.env.SRC_SHA || manifest.source_sha;
-            manifest.cache = `rev-${manifest.version}-${manifest.generation}`;
-            fs.writeFileSync('version.json', JSON.stringify(manifest, null, 2) + '\n');
-          EOF
+      - name: Validate the requested marker
         shell: bash
-
-      - name: Commit and push rotation
-        env:
-          TARGET_VERSION: ${{ inputs.version }}
         run: |
-          set -eu
+          set -euo pipefail
+          if [[ "$TARGET_VERSION" != "v1" && "$TARGET_VERSION" != "v2" ]]; then
+            echo "Unsupported version: $TARGET_VERSION"
+            exit 1
+          fi
+          if [[ ! "$TARGET_GENERATION" =~ ^[1-9][0-9]*$ ]]; then
+            echo "generation must be a positive integer"
+            exit 1
+          fi
+          if [[ -z "$MISSION_ID" ]]; then
+            echo "mission_id is required"
+            exit 1
+          fi
+          if [[ -z "$LIVE_URL" ]]; then
+            echo "Repository variable POLYGRAPH_FIXTURE_URL is required"
+            exit 1
+          fi
+
+      - name: Publish the selected immutable snapshot
+        id: publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_FILE="versions/${TARGET_VERSION}.html"
+          test -f "$SOURCE_FILE"
+
+          CURRENT_VERSION=$(node -e "const m=require('./version.json');process.stdout.write(String(m.version))")
+          CURRENT_GENERATION=$(node -e "const m=require('./version.json');process.stdout.write(String(m.generation))")
+          CURRENT_MISSION=$(node -e "const m=require('./version.json');process.stdout.write(String(m.mission_id || ''))")
+          if (( TARGET_GENERATION < CURRENT_GENERATION )); then
+            echo "generation $TARGET_GENERATION is older than live generation $CURRENT_GENERATION"
+            exit 1
+          fi
+          if (( TARGET_GENERATION == CURRENT_GENERATION )); then
+            if [[ "$FORCE_PUBLISH" != "true" && "$CURRENT_VERSION" == "$TARGET_VERSION" && "$CURRENT_MISSION" == "$MISSION_ID" ]] && cmp -s "$SOURCE_FILE" index.html; then
+              echo "This exact version, generation, and mission marker is already published."
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "generation $TARGET_GENERATION already belongs to a different published state"
+            exit 1
+          fi
+          if [[ "$FORCE_PUBLISH" != "true" && "$CURRENT_VERSION" == "$TARGET_VERSION" && "$CURRENT_MISSION" == "$MISSION_ID" ]] && cmp -s "$SOURCE_FILE" index.html; then
+            echo "This exact version and mission marker is already published."
+            echo "A higher generation was requested, so the live marker will still advance."
+          fi
+
+          cp "$SOURCE_FILE" index.html
+          SOURCE_SHA256=$(shasum -a 256 "$SOURCE_FILE" | awk '{print $1}')
+          PUBLISHED_AT=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
+          export SOURCE_FILE SOURCE_SHA256 PUBLISHED_AT
+          node <<'NODE'
+          const fs = require('node:fs');
+          const { execFileSync } = require('node:child_process');
+          const commits = execFileSync('git', ['log', '--pretty=format:%H', '-n', '5'], { encoding: 'utf8' })
+            .trim()
+            .split('\n')
+            .filter(Boolean);
+          const manifest = {
+            version: process.env.TARGET_VERSION,
+            generation: Number(process.env.TARGET_GENERATION),
+            source: process.env.SOURCE_FILE,
+            source_sha256: process.env.SOURCE_SHA256,
+            published_at: process.env.PUBLISHED_AT,
+            cache: `rev-${process.env.TARGET_VERSION}-${process.env.TARGET_GENERATION}`,
+            mission_id: process.env.MISSION_ID,
+            commits,
+          };
+          fs.writeFileSync('version.json', `${JSON.stringify(manifest, null, 2)}\n`);
+          NODE
+
+          node scripts/smoke-fixture-check.js --target "$TARGET_VERSION"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Commit the production state
+        if: steps.publish.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add index.html version.json
-          if git diff --cached --quiet; then
-            echo "No changes for ${TARGET_VERSION} - skipping push"
-            exit 0
-          fi
-          git commit -m "chore(fixture): switch to ${TARGET_VERSION}"
-          git push
+          git commit -m "chore(fixture): publish ${TARGET_VERSION} for ${MISSION_ID}"
+          git push origin HEAD:main
+
+      - name: Prove the Vercel production alias
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const base = process.env.LIVE_URL.replace(/\/$/, '');
+          const expected = {
+            version: process.env.TARGET_VERSION,
+            generation: process.env.TARGET_GENERATION,
+            missionId: process.env.MISSION_ID,
+          };
+          const deadline = Date.now() + 240_000;
+          const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+          async function probe() {
+            const nonce = `${Date.now()}-${Math.random()}`;
+            const markerResponse = await fetch(`${base}/version.json?nonce=${nonce}`, {
+              cache: 'no-store',
+              headers: { 'cache-control': 'no-cache' },
+            });
+            if (!markerResponse.ok) return false;
+            const marker = await markerResponse.json();
+            if (
+              marker.version !== expected.version ||
+              String(marker.generation) !== expected.generation ||
+              marker.mission_id !== expected.missionId
+            ) return false;
+
+            const pageResponse = await fetch(`${base}/?nonce=${nonce}`, {
+              cache: 'no-store',
+              headers: { 'cache-control': 'no-cache' },
+            });
+            if (!pageResponse.ok) return false;
+            const html = await pageResponse.text();
+            if (!html.includes('SKU-ASTER-001')) return false;
+            if (expected.version === 'v1') {
+              return html.includes('class="product-price"') && !html.includes('money-widget__value');
+            }
+            return !html.includes('product-price') && html.includes('class="money-widget__value"');
+          }
+
+          while (Date.now() < deadline) {
+            try {
+              if (await probe()) {
+                console.log(`Live fixture proved ${expected.version} generation ${expected.generation}.`);
+                process.exit(0);
+              }
+            } catch (error) {
+              console.log(`Waiting for Vercel: ${error.message}`);
+            }
+            await pause(3_000);
+          }
+          throw new Error(`Vercel did not prove ${expected.version} generation ${expected.generation} before timeout`);
+          NODE

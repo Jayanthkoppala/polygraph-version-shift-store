@@ -11,44 +11,55 @@ versions while keeping the same product identity:
 ## Repository contents
 
 - `index.html` — Live fixture page served to scrapers (defaults to V1).
-- `version.json` — Current active fixture metadata (`version`, `generation`, `source_sha`, etc.).
+- `version.json` — Current active fixture metadata (`version`, `generation`, `mission_id`, `source_sha256`, etc.).
 - `versions/v1.html` and `versions/v2.html` — Immutable source snapshots.
 - `.github/workflows/switch-version.yml` — Manual workflow to publish a target version.
 - `vercel.json` — Runtime config, including no-store headers for `version.json`.
 - `scripts/smoke-fixture-check.js` — Local verification script.
 
-## URLs (placeholders)
+## Deployment setup
 
-- Live fixture: `https://<your-vercel-domain>.vercel.app`
-- V1 source: `versions/v1.html`
-- V2 source: `versions/v2.html`
-- Version switch workflow: `.github/workflows/switch-version.yml`
-- Live compare view: swap `version.json` and verify price/SKU in UI.
+Live production fixture: <https://polygraph-version-shift-store.vercel.app>
+
+1. Create this repository on GitHub with `main` as the production branch.
+2. Import the repository into Vercel and deploy from `main`.
+3. Add the GitHub repository variable `POLYGRAPH_FIXTURE_URL` with the stable
+   Vercel production URL, without a trailing slash.
+4. Keep the workflow's generated-file permission at `contents: write`; it only
+   commits `index.html` and `version.json`.
+
+The Vercel project is `jayanth137s-projects/polygraph-version-shift-store`.
 
 ## How to switch versions manually
 
 1. Open the workflow: **Actions → switch-version → Run workflow**
 2. Select:
    - `version`: `v1` or `v2`
-   - `generation`: `auto` (default) or explicit integer
+   - `generation`: a positive integer greater than the current `version.json`
+   - `mission_id`: the Polygraph mission ID
+   - `force`: normally `false`
 3. Run workflow
 4. Workflow behavior:
    - Copies selected source file into `index.html`
    - Updates `version.json` with:
      - `version`
      - `generation`
-     - `source_sha`
+     - `mission_id`
+     - `source_sha256`
      - `published_at`
      - `commits`
-   - Pushes the commit using `GITHUB_TOKEN`
+   - Runs the target-aware local smoke gate
+   - Pushes the generated state to `main` using `GITHUB_TOKEN`
+   - Polls the Vercel production alias until both `version.json` and the live
+     product HTML prove the exact requested state
 
 ## Reset / rollback
 
-- To return to V1:
-  - Run workflow with `version=v1` and `generation=auto`.
-- To return to V2:
-  - Run workflow with `version=v2` and `generation=auto`.
-- For explicit rollback point, pass explicit `generation` and rerun the desired version.
+- To return to V1, dispatch the workflow with `version=v1`, a new higher
+  generation, and the current mission ID.
+- To return to V2, use the same process with `version=v2`.
+- Repeating the exact same version, generation, and mission is a no-op unless
+  `force=true`; a higher generation always advances the live marker.
 
 ## Note
 
