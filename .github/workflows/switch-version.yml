@@ -18,6 +18,7 @@ on:
         options:
           - v1
           - v2
+          - v3
       mutation:
         description: Deterministic fixture mutation scenario
         required: true
@@ -72,7 +73,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "$TARGET_VERSION" != "v1" && "$TARGET_VERSION" != "v2" ]]; then
+          if [[ "$TARGET_VERSION" != "v1" && "$TARGET_VERSION" != "v2" && "$TARGET_VERSION" != "v3" ]]; then
             echo "Unsupported version: $TARGET_VERSION"
             exit 1
           fi
@@ -197,7 +198,8 @@ jobs:
             if (expected.mutation === 'selector-break') {
               return !html.includes('product-price')
                 && !html.includes('money-widget__value')
-                && !html.includes('commerce-amount');
+                && !html.includes('commerce-amount')
+                && !html.includes('listing-price__amount');
             }
             if (expected.version === 'v1') {
               return html.includes('data-product-ref="Product/Code-123"')
@@ -208,13 +210,28 @@ jobs:
                 && !html.includes('class="catalog-heading"')
                 && !html.includes('commerce-amount');
             }
-            return html.includes('data-catalog-key="Product/Code-123"')
-              && html.includes('<section class="identity"><div class="catalog-heading"')
+            if (expected.version === 'v2') {
+              return html.includes('data-catalog-key="Product/Code-123"')
+                && html.includes('<section class="identity"><div class="catalog-heading"')
+                && html.includes('<h2 class="stock-status">In stock</h2>')
+                && !html.includes('data-product-ref=')
+                && !html.includes('data-listing-id=')
+                && !html.includes('class="product-title"')
+                && !html.includes('class="listing-headline"')
+                && !html.includes('money-widget__value')
+                && !html.includes('listing-price__amount')
+                && html.includes('class="commerce-amount"');
+            }
+            return html.includes('data-listing-id="Product/Code-123"')
+              && html.includes('<section class="identity"><div class="listing-headline"')
               && html.includes('<h2 class="stock-status">In stock</h2>')
               && !html.includes('data-product-ref=')
+              && !html.includes('data-catalog-key=')
               && !html.includes('class="product-title"')
+              && !html.includes('class="catalog-heading"')
               && !html.includes('money-widget__value')
-              && html.includes('class="commerce-amount"');
+              && !html.includes('commerce-amount')
+              && html.includes('class="listing-price__amount"');
           }
 
           while (Date.now() < deadline) {

@@ -1,7 +1,7 @@
 # Northbound Market Fixture Store
 
 This repository hosts a static, public fixture product site used by the Polygraph demo.
-It simulates a real storefront page that can switch between two structurally different product
+It simulates a real storefront page that can switch between three structurally different product
 versions while keeping the same product identity:
 
 - Product code: `Product/Code-123`
@@ -12,7 +12,7 @@ versions while keeping the same product identity:
 
 - `index.html` — Live fixture page served to scrapers (defaults to V1).
 - `version.json` — Current active fixture metadata (`version`, `generation`, `mission_id`, `source_sha256`, etc.).
-- `versions/v1.html` and `versions/v2.html` — Immutable source snapshots.
+- `versions/v1.html`, `versions/v2.html`, and `versions/v3.html` — Immutable source snapshots.
 - `.github/workflows/switch-version.yml` — Manual workflow to publish a target version and deterministic mutation scenario.
 - `scripts/apply-mutation.js` — Reproducible DOM/selector/decoy mutation generator.
 - `vercel.json` — Runtime config, including no-store headers for `version.json`.
@@ -35,7 +35,7 @@ The Vercel project is `jayanth137s-projects/polygraph-version-shift-store`.
 
 1. Open the workflow: **Actions → switch-version → Run workflow**
 2. Select:
-   - `version`: `v1` or `v2` (semantic snapshot)
+   - `version`: `v1`, `v2`, or `v3` (semantic snapshot)
    - `mutation`: `none`, `dom-drift`, `selector-break`, `decoy`, or `metadata-only`
    - `generation`: a positive integer greater than the current `version.json`
    - `mission_id`: the Polygraph mission ID
@@ -61,6 +61,7 @@ The Vercel project is `jayanth137s-projects/polygraph-version-shift-store`.
 - To return to V1, dispatch the workflow with `version=v1`, a new higher
   generation, and the current mission ID.
 - To return to V2, use the same process with `version=v2`.
+- To advance to the append-only V3 selector contract, use `version=v3`.
 - Repeating the exact same version, generation, mission, and mutation is a no-op unless
   `force=true`; a higher generation always advances the live marker.
 
