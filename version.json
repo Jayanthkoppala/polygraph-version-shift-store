@@ -1,10 +1,14 @@
 {
-  "version": "v1",
-  "generation": 1,
-  "source": "versions/v1.html",
-  "source_sha256": "6026ce6079771d982f9a17d9da075d48e071488cfa094c597dfc656918c50d73",
-  "published_at": "2026-08-22T00:00:00.000Z",
-  "cache": "rev-v1-1",
-  "mission_id": null,
-  "commits": []
+  "version": "v2",
+  "generation": 2,
+  "source": "versions/v2.html",
+  "source_sha256": "4b5c37aff7bf41a8a5a127654d514529524ec425c0b3dae7796fc450984a1764",
+  "published_at": "2026-08-22T00:49:10.000Z",
+  "cache": "rev-v2-2",
+  "mission_id": "preflight-v2",
+  "commits": [
+    "fb3fd9ac10d30a6ad41e65b04d5cdb8c7ae0738a",
+    "ce31313277767378111b99d3da5b0d316338b9e8",
+    "91856c78d2d5018c2a58bf59164916a4205580fa"
+  ]
 }
