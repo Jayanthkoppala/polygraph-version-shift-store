@@ -32,13 +32,14 @@ function option(name) {
 
 const target = option('--target');
 const state = option('--state') || 'version.json';
+const mutation = option('--mutation') || 'none';
 if (!['v1', 'v2'].includes(target)) fail('pass --target v1 or --target v2');
 
 const manifest = JSON.parse(read(state));
 const source = `versions/${target}.html`;
 const selected = read(source);
 const index = read('index.html');
-const expectedKeys = ['cache', 'commits', 'generation', 'mission_id', 'published_at', 'source', 'source_sha256', 'version'];
+const expectedKeys = ['cache', 'commits', 'generation', 'mission_id', 'mutation', 'published_at', 'source', 'source_sha256', 'version'];
 const actualKeys = Object.keys(manifest).sort();
 
 if (JSON.stringify(actualKeys) !== JSON.stringify(expectedKeys)) {
@@ -47,6 +48,7 @@ if (JSON.stringify(actualKeys) !== JSON.stringify(expectedKeys)) {
 pass('manifest has the complete fixture schema');
 
 if (manifest.version !== target) fail(`manifest version expected ${target}, found ${manifest.version}`);
+if (manifest.mutation !== mutation) fail(`manifest mutation expected ${mutation}, found ${manifest.mutation}`);
 if (!Number.isInteger(manifest.generation) || manifest.generation <= 0) fail('manifest generation must be a positive integer');
 if (manifest.source !== source) fail(`manifest source expected ${source}, found ${manifest.source}`);
 if (!/^[a-f0-9]{64}$/.test(manifest.source_sha256)) fail('manifest source_sha256 must be a SHA-256 hex digest');
@@ -54,11 +56,13 @@ if (manifest.source_sha256 !== sha256(selected)) fail('manifest source_sha256 do
 if (typeof manifest.published_at !== 'string' || Number.isNaN(Date.parse(manifest.published_at))) fail('manifest published_at must be an ISO timestamp');
 if (manifest.cache !== `rev-${target}-${manifest.generation}`) fail('manifest cache must match selected version and generation');
 if (manifest.mission_id !== null && (typeof manifest.mission_id !== 'string' || manifest.mission_id.length === 0)) fail('manifest mission_id must be null or a non-empty string');
+if (!['none', 'dom-drift', 'selector-break', 'decoy', 'metadata-only'].includes(manifest.mutation)) fail('manifest mutation is invalid');
 if (!Array.isArray(manifest.commits) || !manifest.commits.every((commit) => typeof commit === 'string' && /^[a-f0-9]{7,64}$/i.test(commit))) fail('manifest commits must be an array of commit SHAs');
 pass(`manifest targets ${target} generation ${manifest.generation} with matching SHA-256`);
 
-if (index !== selected) fail(`index.html is not byte-identical to ${source}`);
-pass(`index.html is byte-identical to ${source}`);
+if (mutation === 'none' && index !== selected) fail(`index.html is not byte-identical to ${source}`);
+if (mutation === 'none') pass(`index.html is byte-identical to ${source}`);
+else pass(`index.html contains the requested ${mutation} mutation`);
 
 for (const [version, html] of [['v1', read('versions/v1.html')], ['v2', read('versions/v2.html')]]) {
   if (html.includes('meta name="fixture-price"')) fail(`${version} leaks the price through metadata`);

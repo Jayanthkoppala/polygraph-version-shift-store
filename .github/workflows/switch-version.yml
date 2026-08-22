@@ -18,6 +18,17 @@ on:
         options:
           - v1
           - v2
+      mutation:
+        description: Deterministic fixture mutation scenario
+        required: true
+        default: none
+        type: choice
+        options:
+          - none
+          - dom-drift
+          - selector-break
+          - decoy
+          - metadata-only
       generation:
         description: Positive integer greater than the live generation
         required: true
@@ -46,6 +57,8 @@ jobs:
       TARGET_VERSION: ${{ inputs.version }}
       TARGET_GENERATION: ${{ inputs.generation }}
       MISSION_ID: ${{ inputs.mission_id }}
+      # Older dispatches did not have this input; preserve the original v1/v2 behavior.
+      MUTATION: ${{ inputs.mutation || 'none' }}
       FORCE_PUBLISH: ${{ inputs.force }}
       LIVE_URL: ${{ vars.POLYGRAPH_FIXTURE_URL }}
     steps:
@@ -71,6 +84,7 @@ jobs:
             echo "mission_id is required"
             exit 1
           fi
+          case "$MUTATION" in none|dom-drift|selector-break|decoy|metadata-only) ;; *) echo "Unsupported mutation: $MUTATION"; exit 1 ;; esac
           if [[ -z "$LIVE_URL" ]]; then
             echo "Repository variable POLYGRAPH_FIXTURE_URL is required"
             exit 1
@@ -105,7 +119,7 @@ jobs:
             echo "A higher generation was requested, so the live marker will still advance."
           fi
 
-          cp "$SOURCE_FILE" index.html
+          node scripts/apply-mutation.js "$SOURCE_FILE" index.html "$MUTATION"
           SOURCE_SHA256=$(shasum -a 256 "$SOURCE_FILE" | awk '{print $1}')
           PUBLISHED_AT=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
           export SOURCE_FILE SOURCE_SHA256 PUBLISHED_AT
@@ -124,12 +138,13 @@ jobs:
             published_at: process.env.PUBLISHED_AT,
             cache: `rev-${process.env.TARGET_VERSION}-${process.env.TARGET_GENERATION}`,
             mission_id: process.env.MISSION_ID,
+            mutation: process.env.MUTATION,
             commits,
           };
           fs.writeFileSync('version.json', `${JSON.stringify(manifest, null, 2)}\n`);
           NODE
 
-          node scripts/smoke-fixture-check.js --target "$TARGET_VERSION"
+          node scripts/smoke-fixture-check.js --target "$TARGET_VERSION" --mutation "$MUTATION"
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
       - name: Commit the production state
@@ -153,6 +168,7 @@ jobs:
             version: process.env.TARGET_VERSION,
             generation: process.env.TARGET_GENERATION,
             missionId: process.env.MISSION_ID,
+            mutation: process.env.MUTATION,
           };
           const deadline = Date.now() + 240_000;
           const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -169,6 +185,7 @@ jobs:
               marker.version !== expected.version ||
               String(marker.generation) !== expected.generation ||
               marker.mission_id !== expected.missionId
+              || marker.mutation !== expected.mutation
             ) return false;
 
             const pageResponse = await fetch(`${base}/?nonce=${nonce}`, {
@@ -177,7 +194,10 @@ jobs:
             });
             if (!pageResponse.ok) return false;
             const html = await pageResponse.text();
-            if (!html.includes('SKU-ASTER-001')) return false;
+            if (!html.includes('data-product-code="Product/Code-123"')) return false;
+            if (expected.mutation === 'selector-break') {
+              return !html.includes('product-price') && !html.includes('money-widget__value');
+            }
             if (expected.version === 'v1') {
               return html.includes('class="product-price"') && !html.includes('money-widget__value');
             }
