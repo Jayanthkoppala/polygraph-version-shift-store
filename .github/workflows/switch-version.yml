@@ -194,14 +194,17 @@ jobs:
             });
             if (!pageResponse.ok) return false;
             const html = await pageResponse.text();
-            if (!html.includes('data-product-code="Product/Code-123"')) return false;
             if (expected.mutation === 'selector-break') {
               return !html.includes('product-price') && !html.includes('money-widget__value');
             }
             if (expected.version === 'v1') {
-              return html.includes('class="product-price"') && !html.includes('money-widget__value');
+              return html.includes('data-product-code="Product/Code-123"')
+                && html.includes('class="product-price"')
+                && !html.includes('money-widget__value');
             }
-            return !html.includes('product-price') && html.includes('class="money-widget__value"');
+            return html.includes('data-product-ref="Product/Code-123"')
+              && !html.includes('product-price')
+              && html.includes('class="money-widget__value"');
           }
 
           while (Date.now() < deadline) {
