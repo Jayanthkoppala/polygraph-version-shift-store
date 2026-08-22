@@ -1,17 +1,17 @@
 {
-  "version": "v1",
-  "generation": 1787431648199,
-  "source": "versions/v1.html",
-  "source_sha256": "1721267ea15c1ac68a26df4bab9b17b0bc82e5521867fdfb87bd6ed8ed815433",
-  "published_at": "2026-08-22T20:47:36.000Z",
-  "cache": "rev-v1-1787431648199",
+  "version": "v2",
+  "generation": 1787431720864,
+  "source": "versions/v2.html",
+  "source_sha256": "c304ce71d7852f79ad11cb31429979864343971fc39ca0b568bd5ce23672a32a",
+  "published_at": "2026-08-22T20:48:49.000Z",
+  "cache": "rev-v2-1787431720864",
   "mission_id": "ce9cad32-b60f-413b-8b6d-09cd1bfddfa6",
   "mutation": "none",
   "commits": [
+    "db4966e8fb1a06880552232928d2fb3c80d02108",
     "32c63835252f1d15a48bc6d3dd59102f53926e42",
     "a1695f88146f0c5daa2c866928c7e86b2021b259",
     "06013fdfc0faee38cca2cda68c4e14684ee4193b",
-    "0bc8ab97209a9b45748b5fd9c2857d01b5d23832",
-    "7452606391025b7d381c01608175a59d19d5d0f3"
+    "0bc8ab97209a9b45748b5fd9c2857d01b5d23832"
   ]
 }
