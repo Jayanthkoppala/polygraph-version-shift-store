@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -76,6 +77,8 @@ const v2 = read('versions/v2.html');
 if (count(v1, 'class="product-price"') !== 1 || !v1.includes('<p class="product-price">£51.77</p>')) fail('V1 must expose the legacy .product-price anchor exactly once');
 if (v2.includes('product-price') || count(v2, 'class="money-widget__value"') !== 1 || !v2.includes('class="money-widget__value" aria-label="product amount">£51.77')) fail('V2 must expose the price only via the structurally different .money-widget__value selector');
 pass('V1 legacy and V2 replacement selectors have the exact expected outcome');
+
+execFileSync(process.execPath, [path.join(root, 'scripts/smoke-source-contract.js')], { stdio: 'inherit' });
 
 if (!fs.existsSync(path.join(root, '.github/workflows/switch-version.yml'))) fail('workflow file missing');
 pass('workflow file exists');

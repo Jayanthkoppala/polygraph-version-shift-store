@@ -199,10 +199,18 @@ jobs:
             }
             if (expected.version === 'v1') {
               return html.includes('data-product-code="Product/Code-123"')
+                && html.includes('<section class="identity"><h1>')
                 && html.includes('class="product-price"')
+                && html.includes('<h2 class="stock-status">In stock</h2>')
+                && !html.includes('data-product-ref=')
+                && !html.includes('class="product-title"')
                 && !html.includes('money-widget__value');
             }
             return html.includes('data-product-ref="Product/Code-123"')
+              && html.includes('<section class="identity"><div class="product-title"')
+              && html.includes('<h2 class="stock-status">In stock</h2>')
+              && !html.includes('data-product-code=')
+              && !html.includes('<section class="identity"><h1>')
               && !html.includes('product-price')
               && html.includes('class="money-widget__value"');
           }
