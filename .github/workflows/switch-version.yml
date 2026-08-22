@@ -3,6 +3,11 @@ name: switch-version
 run-name: Publish ${{ inputs.version }} · generation ${{ inputs.generation }}
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/switch-version.yml
   workflow_dispatch:
     inputs:
       version:
@@ -33,7 +38,7 @@ concurrency:
 
 jobs:
   publish:
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
