@@ -31,11 +31,11 @@ for (const [version, html] of [['V1', v1], ['V2', v2]]) {
 }
 pass('both versions preserve identical product values and availability markup');
 
-if (!v1.includes(`<section class="identity"><h1>${title}</h1>`)) fail('V1 must expose the title through the legacy h1 anchor');
-if (!v1.includes(`data-product-code="${productCode}"`) || v1.includes('data-product-ref=')) fail('V1 must expose only the legacy product-code anchor');
-if (count(v1, 'class="product-price"') !== 1 || v1.includes('money-widget__value')) fail('V1 must expose only the legacy price anchor');
+if (!v1.includes(`<section class="identity"><div class="product-title" role="heading" aria-level="1">${title}</div>`)) fail('V1 must expose the title through the current product-title anchor');
+if (!v1.includes(`data-product-ref="${productCode}"`) || v1.includes('data-catalog-key=')) fail('V1 must expose only the current product-code anchor');
+if (count(v1, 'class="money-widget__value"') !== 1 || v1.includes('class="commerce-amount"')) fail('V1 must expose only the current price anchor');
 
-if (!v2.includes(`<section class="identity"><div class="product-title" role="heading" aria-level="1">${title}</div>`)) fail('V2 must expose the title through the replacement product-title anchor');
-if (!v2.includes(`data-product-ref="${productCode}"`) || v2.includes('data-product-code=')) fail('V2 must expose only the replacement product-code anchor');
-if (count(v2, 'class="money-widget__value"') !== 1 || v2.includes('class="product-price"')) fail('V2 must expose only the replacement price anchor');
+if (!v2.includes(`<section class="identity"><div class="catalog-heading" role="heading" aria-level="1">${title}</div>`)) fail('V2 must expose the title through the replacement catalog-heading anchor');
+if (!v2.includes(`data-catalog-key="${productCode}"`) || v2.includes('data-product-ref=')) fail('V2 must expose only the replacement product-code anchor');
+if (count(v2, 'class="commerce-amount"') !== 1 || v2.includes('class="money-widget__value"')) fail('V2 must expose only the replacement price anchor');
 pass('exactly product code, title, and price move between V1 and V2');
