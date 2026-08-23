@@ -2,25 +2,25 @@
   "version": "evolving",
   "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484959,
-  "parent_generation": 1787443484958,
-  "seed": "pg_1787443484959_18157cb42b8b4c9a853b3853",
-  "mission_id": "18157cb4-2b8b-4c9a-853b-38536f29d822",
+  "generation": 1787443484960,
+  "parent_generation": 1787443484959,
+  "seed": "pg_1787443484960_77d3d67b7deb4ea7b5aa2603",
+  "mission_id": "77d3d67b-7deb-4ea7-b5aa-26037834e368",
   "generator": {
     "name": "evolve-store",
     "version": 5
   },
   "canonical_source": "versions/v2.html",
   "template_sha256": "cc971399aa190abe86bb252568c25d969febbf4bd57e9c8a87c89905217a7bd7",
-  "html_sha256": "ced20274626d01bbacb44848cb0ecdf1f9172c42545f2a4d5adeac7cc4718fc9",
+  "html_sha256": "5fb4cbb21baa8aab52862a39fa20871b3639241070f14e28b3c7ab8384c4bbfc",
   "variant": {
     "profile": "seeded-dom-text-elements",
-    "selector_digest": "c508a70fefba3318"
+    "selector_digest": "9118528dabf7ed0f"
   },
   "anchors": {
-    "product_code": "[data-pg-code-d5ae02823a6d]",
-    "title": "[data-pg-title-d3ca20ce3cc5]",
-    "price": "[data-pg-price-1da2c8ccdc26]",
+    "product_code": "[data-pg-code-1810d7465bc9]",
+    "title": "[data-pg-title-8eee75446d2f]",
+    "price": "[data-pg-price-14ee00c187d6]",
     "availability": ".stock-status"
   },
   "invariants": {
@@ -33,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T18:41:02.000Z",
-  "cache": "generation-1787443484959-pg_1787443484959_18157cb42b8b4c9a853b3853",
+  "published_at": "2026-08-23T18:45:26.000Z",
+  "cache": "generation-1787443484960-pg_1787443484960_77d3d67b7deb4ea7b5aa2603",
   "commits": [
+    "6008591af7226fca0ebd9a5e58c266b67ba6ad3e",
     "578817f4dd07a934bd2343a4c2527bb44467d6f4",
     "89eba59651d2c0fbda3c57dad16736685a3def67",
     "b737b23ae18d0119f39954a9015c1d5e4e8be674",
-    "accb95d7545643065fbd4838323efa5d9c0ef896",
-    "ea6403b16f8d80fe65ab3ace12612fb62cfa95c7"
+    "accb95d7545643065fbd4838323efa5d9c0ef896"
   ]
 }
