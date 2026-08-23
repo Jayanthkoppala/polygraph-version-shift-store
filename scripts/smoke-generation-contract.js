@@ -44,34 +44,35 @@ assert.equal(first.seed, 'pg_42_a81f');
 assert.equal(first.mission_id, 'mission-contract-test');
 assert.deepEqual(Object.keys(first.anchors).sort(), ['availability', 'price', 'product_code', 'title']);
 assert.equal(first.anchors.availability, '.stock-status');
-assert.ok(first.anchors.product_code.startsWith('[data-'));
-assert.ok(first.anchors.title.startsWith('.') || first.anchors.title.startsWith('[data-'));
-assert.ok(first.anchors.price.startsWith('.') || first.anchors.price.startsWith('[data-'));
+assert.match(first.anchors.product_code, /^pg-code-[a-f0-9]{12}$/);
+assert.match(first.anchors.title, /^pg-title-[a-f0-9]{12}$/);
+assert.match(first.anchors.price, /^pg-price-[a-f0-9]{12}$/);
 
 for (const value of ['Product/Code-123', 'Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue', '£51.77', 'In stock']) {
   assert.ok(html.includes(value), `generated HTML must preserve ${value}`);
 }
-for (const oldAnchor of ['data-catalog-key=', 'class="catalog-heading"', 'class="commerce-amount"']) {
+for (const oldAnchor of ['data-catalog-key=', 'class="catalog-heading"', 'class="commerce-amount"', 'role="heading"', 'aria-level="1"', 'aria-label="product amount"', '<dl class="specs">', '<dt>', '<dd']) {
   assert.ok(!html.includes(oldAnchor), `generated HTML must not keep old extraction anchor ${oldAnchor}`);
 }
 assert.ok(html.includes('class="stock-status"'), 'availability control must stay stable');
 assert.ok(html.includes('name="polygraph-generation" content="42"'), 'page must expose its generation marker');
 assert.equal(first.schema_version, 3);
-assert.equal(first.generator.version, 2);
-assert.ok(['catalog-attributes', 'product-properties', 'offer-schema'].includes(first.variant.profile));
+assert.equal(first.generator.version, 3);
+assert.equal(first.variant.profile, 'opaque-custom-elements');
 assert.equal(first.contract_version, 'polygraph-owned-product/v1');
 assert.equal(first.template_sha256, crypto.createHash('sha256').update(fs.readFileSync(canonical)).digest('hex'));
 assert.equal(first.html_sha256, crypto.createHash('sha256').update(fs.readFileSync(one)).digest('hex'));
 assert.deepEqual(first.invariants.price, { value: 51.77, currency: 'GBP', symbol: '£' });
 
-// Presentation must not be coupled to the selector classes that a scraper
-// needs to relearn. These structural rules style every generated tag shape
-// (div, h1, section, p, output) without retaining canonical scraper classes.
-for (const hook of [
-  '.identity>:first-child{display:block;font-size:25px;line-height:1.24;font-weight:500;text-wrap:balance;margin:0 0 9px}',
-  '.pricebox>:nth-child(2){display:block;font-size:31px;letter-spacing:-1.5px;color:var(--red);margin:2px 0 7px}',
-]) {
-  assert.ok(html.includes(hook), `generated HTML must retain the stable presentation hook ${hook}`);
+assert.ok(html.includes(`<${first.anchors.title}>Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue</${first.anchors.title}>`));
+assert.ok(html.includes(`<${first.anchors.price}>£51.77</${first.anchors.price}>`));
+assert.ok(html.includes(`<${first.anchors.product_code}>Product/Code-123</${first.anchors.product_code}>`));
+assert.ok(html.includes('data-polygraph-presentation='), 'generated HTML must include a presentation contract for opaque elements');
+
+for (const tag of new Set([...html.matchAll(/<\/?(pg-(?:detail|title|offer|price|spec-grid|label|value|code)-[a-f0-9]{12})>/g)].map((match) => match[1]))) {
+  const opens = (html.match(new RegExp(`<${tag}>`, 'g')) || []).length;
+  const closes = (html.match(new RegExp(`</${tag}>`, 'g')) || []).length;
+  assert.equal(opens, closes, `${tag} must be balanced`);
 }
 
 const parentState = path.join(temporary, 'parent-version.json');
@@ -86,23 +87,6 @@ const child = JSON.parse(execFileSync(process.execPath, [generator,
   '--parent-state', parentState,
   '--manifest-only',
 ], { encoding: 'utf8' }));
-assert.notEqual(child.variant.profile, first.variant.profile, 'successive generation must choose a different structural profile');
 assert.notDeepEqual(child.anchors, first.anchors, 'successive generation must change extraction anchors');
-
-const expectedProfiles = new Set(['catalog-attributes', 'product-properties', 'offer-schema']);
-const observedProfiles = new Set([first.variant.profile]);
-for (let candidate = 0; candidate < 96 && observedProfiles.size < expectedProfiles.size; candidate++) {
-  const output = path.join(temporary, `profile-${candidate}.html`);
-  const manifest = generate(output, `pg_presentation_${candidate}`);
-  const profileHtml = fs.readFileSync(output, 'utf8');
-  observedProfiles.add(manifest.variant.profile);
-  for (const hook of [
-    '.identity>:first-child{display:block;font-size:25px;line-height:1.24;font-weight:500;text-wrap:balance;margin:0 0 9px}',
-    '.pricebox>:nth-child(2){display:block;font-size:31px;letter-spacing:-1.5px;color:var(--red);margin:2px 0 7px}',
-  ]) assert.ok(profileHtml.includes(hook), `${manifest.variant.profile} must keep ${hook}`);
-  assert.ok(!profileHtml.includes('class="catalog-heading"'), `${manifest.variant.profile} must still remove the canonical title extraction class`);
-  assert.ok(!profileHtml.includes('class="commerce-amount"'), `${manifest.variant.profile} must still remove the canonical price extraction class`);
-}
-assert.deepEqual([...observedProfiles].sort(), [...expectedProfiles].sort(), 'the presentation contract must cover every deterministic structural profile');
 
 console.log('✓ seeded generation contract is deterministic and preserves the product contract');

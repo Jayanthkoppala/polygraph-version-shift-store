@@ -101,7 +101,11 @@ jobs:
           set -euo pipefail
           node <<'NODE'
           const crypto = require('node:crypto');
-          const selectorAttribute = (selector) => selector.startsWith('[') ? selector.slice(1, -1) : `class="${selector.slice(1)}"`;
+          const selectorContains = (html, selector, value) => selector.startsWith('[')
+            ? html.includes(`${selector.slice(1, -1)}="${value}"`)
+            : selector.startsWith('.')
+              ? html.includes(`class="${selector.slice(1)}"`) && html.includes(value)
+              : html.includes(`<${selector}>${value}</${selector}>`);
           async function main() {
             const base = process.env.LIVE_URL.replace(/\/$/, '');
             const expected = { generation: Number(process.env.TARGET_GENERATION), parentGeneration: Number(process.env.PARENT_GENERATION), seed: process.env.GENERATION_SEED, missionId: process.env.MISSION_ID };
@@ -119,9 +123,9 @@ jobs:
               return marker.schema_version === 3
                 && crypto.createHash('sha256').update(html).digest('hex') === marker.html_sha256
                 && html.includes(`name="polygraph-generation" content="${expected.generation}"`)
-                && html.includes(`${marker.anchors.product_code.slice(1, -1)}="Product/Code-123"`)
-                && html.includes(selectorAttribute(marker.anchors.title))
-                && html.includes(selectorAttribute(marker.anchors.price))
+                && selectorContains(html, marker.anchors.product_code, marker.invariants.product_code)
+                && selectorContains(html, marker.anchors.title, 'Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue')
+                && selectorContains(html, marker.anchors.price, marker.invariants.price.symbol + marker.invariants.price.value.toFixed(2))
                 && html.includes('class="stock-status"');
             }
             while (Date.now() < deadline) { try { if (await probe()) return; } catch (error) { console.log(`Waiting for Vercel: ${error.message}`); } await pause(3_000); }
