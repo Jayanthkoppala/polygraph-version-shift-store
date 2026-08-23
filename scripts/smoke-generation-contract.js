@@ -44,9 +44,9 @@ assert.equal(first.seed, 'pg_42_a81f');
 assert.equal(first.mission_id, 'mission-contract-test');
 assert.deepEqual(Object.keys(first.anchors).sort(), ['availability', 'price', 'product_code', 'title']);
 assert.equal(first.anchors.availability, '.stock-status');
-assert.match(first.anchors.product_code, /^pg-code-[a-f0-9]{12}$/);
-assert.match(first.anchors.title, /^pg-title-[a-f0-9]{12}$/);
-assert.match(first.anchors.price, /^pg-price-[a-f0-9]{12}$/);
+assert.match(first.anchors.product_code, /^\[data-pg-code-[a-f0-9]{12}\]$/);
+assert.match(first.anchors.title, /^\[data-pg-title-[a-f0-9]{12}\]$/);
+assert.match(first.anchors.price, /^\[data-pg-price-[a-f0-9]{12}\]$/);
 
 for (const value of ['Product/Code-123', 'Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue', '£51.77', 'In stock']) {
   assert.ok(html.includes(value), `generated HTML must preserve ${value}`);
@@ -57,20 +57,28 @@ for (const oldAnchor of ['data-catalog-key=', 'class="catalog-heading"', 'class=
 assert.ok(html.includes('class="stock-status"'), 'availability control must stay stable');
 assert.ok(html.includes('name="polygraph-generation" content="42"'), 'page must expose its generation marker');
 assert.equal(first.schema_version, 3);
-assert.equal(first.generator.version, 3);
-assert.equal(first.variant.profile, 'opaque-custom-elements');
+assert.equal(first.generator.version, 4);
+assert.equal(first.variant.profile, 'opaque-attribute-elements');
 assert.equal(first.contract_version, 'polygraph-owned-product/v1');
 assert.equal(first.template_sha256, crypto.createHash('sha256').update(fs.readFileSync(canonical)).digest('hex'));
 assert.equal(first.html_sha256, crypto.createHash('sha256').update(fs.readFileSync(one)).digest('hex'));
 assert.deepEqual(first.invariants.price, { value: 51.77, currency: 'GBP', symbol: '£' });
 
-assert.ok(html.includes(`<${first.anchors.title}>Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue</${first.anchors.title}>`));
-assert.ok(html.includes(`<${first.anchors.price}>£51.77</${first.anchors.price}>`));
-assert.ok(html.includes(`<${first.anchors.product_code}>Product/Code-123</${first.anchors.product_code}>`));
+for (const [selector, value] of Object.entries({
+  [first.anchors.title]: 'Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue',
+  [first.anchors.price]: '£51.77',
+  [first.anchors.product_code]: 'Product/Code-123',
+})) {
+  assert.ok(html.includes(`${selector.slice(1, -1)}="${value}"`), `${selector} must preserve its value in a randomized attribute`);
+}
+const renderedText = html.replace(/<[^>]*>/g, '');
+for (const value of ['Product/Code-123', 'Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue', '£51.77']) {
+  assert.ok(!renderedText.includes(value), `${value} must not remain in a generated text node`);
+}
 assert.ok(html.includes('data-polygraph-presentation='), 'generated HTML must include a presentation contract for opaque elements');
 
-for (const tag of new Set([...html.matchAll(/<\/?(pg-(?:detail|title|offer|price|spec-grid|label|value|code)-[a-f0-9]{12})>/g)].map((match) => match[1]))) {
-  const opens = (html.match(new RegExp(`<${tag}>`, 'g')) || []).length;
+for (const tag of new Set([...html.matchAll(/<\/?(pg-(?:detail|title|offer|price|spec-grid|label|value|code)-[a-f0-9]{12})(?:\s[^>]*)?>/g)].map((match) => match[1]))) {
+  const opens = (html.match(new RegExp(`<${tag}(?:\\s[^>]*)?>`, 'g')) || []).length;
   const closes = (html.match(new RegExp(`</${tag}>`, 'g')) || []).length;
   assert.equal(opens, closes, `${tag} must be balanced`);
 }
