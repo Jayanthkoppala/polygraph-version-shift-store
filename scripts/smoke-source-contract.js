@@ -29,4 +29,6 @@ for (const input of ['generation:', 'parent_generation:', 'seed:', 'mission_id:'
   if (!workflow.includes(input)) fail(`evolution workflow missing ${input}`);
 }
 if (workflow.includes('TARGET_VERSION') || workflow.includes('MUTATION')) fail('workflow must not use fixed version or mutation dispatches');
+if (!workflow.includes('html.includes(`${selector.slice(1, -1)}>${value}</`)')) fail('workflow must prove generated anchors resolve real DOM text');
+if (workflow.includes('html.includes(`${selector.slice(1, -1)}="${value}"`)')) fail('workflow must not accept attribute-only monitored values');
 pass('workflow dispatches deterministic generation evolution only');

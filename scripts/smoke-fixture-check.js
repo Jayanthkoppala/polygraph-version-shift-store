@@ -30,14 +30,14 @@ if (manifest.generation !== expectedGeneration || manifest.parent_generation !==
 if (manifest.canonical_source !== 'versions/v2.html') fail('canonical source must remain versions/v2.html');
 if (manifest.template_sha256 !== sha256(canonical)) fail('canonical template SHA does not match versions/v2.html');
 if (manifest.html_sha256 !== sha256(index)) fail('generated HTML SHA does not match index.html');
-if (manifest.generator?.name !== 'evolve-store' || manifest.generator?.version !== 4) fail('generator identity is invalid');
+if (manifest.generator?.name !== 'evolve-store' || manifest.generator?.version !== 5) fail('generator identity is invalid');
 if (manifest.invariants?.product_code !== 'Product/Code-123' || manifest.invariants?.price?.value !== 51.77 || manifest.invariants?.price?.currency !== 'GBP' || manifest.invariants?.price?.symbol !== '£' || manifest.invariants?.availability !== 'In stock') fail('product invariants are invalid');
 if (manifest.cache !== `generation-${expectedGeneration}-${expectedSeed}`) fail('cache marker does not match generation and seed');
 if (typeof manifest.published_at !== 'string' || Number.isNaN(Date.parse(manifest.published_at))) fail('published_at must be ISO timestamp');
 if (!Array.isArray(manifest.commits)) fail('commits must be an array');
 pass('manifest records deterministic generation evidence');
 
-if (manifest.variant?.profile !== 'opaque-attribute-elements' || !/^[a-f0-9]{16}$/.test(manifest.variant?.selector_digest || '')) {
+if (manifest.variant?.profile !== 'seeded-dom-text-elements' || !/^[a-f0-9]{16}$/.test(manifest.variant?.selector_digest || '')) {
   fail('manifest must record a reproducible structural variant');
 }
 pass('manifest records the structural variant used for this generation');
@@ -55,7 +55,7 @@ for (const value of ['Product/Code-123', 'Aster QuietWave Wireless Noise-Cancell
   if (!index.includes(value)) fail(`generated product page lost ${value}`);
 }
 const selectorContains = (selector, value) => selector.startsWith('[')
-  ? index.includes(`${selector.slice(1, -1)}="${value}"`)
+  ? index.includes(`${selector.slice(1, -1)}>${value}</`)
   : selector.startsWith('.')
     ? index.includes(`class="${selector.slice(1)}"`) && index.includes(value)
     : index.includes(`<${selector}>${value}</${selector}>`);
@@ -64,12 +64,19 @@ if (!selectorContains(title, 'Aster QuietWave Wireless Noise-Cancelling Headphon
 if (!selectorContains(price, '£51.77')) fail('generated price anchor is absent');
 const renderedText = index.replace(/<[^>]*>/g, '');
 for (const value of ['Product/Code-123', 'Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue', '£51.77']) {
-  if (renderedText.includes(value)) fail(`generated ${value} must be attribute-only`);
+  if (!renderedText.includes(value)) fail(`generated ${value} must remain a real DOM text node`);
 }
 if (!index.includes('class="stock-status"')) fail('stable availability control is absent');
 if (!index.includes(`name="polygraph-generation" content="${expectedGeneration}"`)) fail('generation marker absent from page');
 if (index.includes('data-catalog-key=') || index.includes('class="catalog-heading"') || index.includes('class="commerce-amount"') || index.includes('role="heading"') || index.includes('aria-level="1"') || index.includes('aria-label="product amount"') || index.includes('<dl class="specs">') || index.includes('<dt>') || index.includes('<dd')) fail('generated page retained semantic extraction fallbacks');
 if (!index.includes('data-polygraph-presentation=')) fail('generated page lost opaque-element presentation contract');
+const visibleText = (page) => page
+  .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+  .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+  .replace(/<[^>]*>/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+if (visibleText(index) !== visibleText(canonical)) fail('generated page changed visible copy or order');
 pass('generated page preserves product meaning while changing exactly three extraction anchors');
 
 if (!fs.existsSync(path.join(root, '.github/workflows/switch-version.yml'))) fail('evolution workflow missing');

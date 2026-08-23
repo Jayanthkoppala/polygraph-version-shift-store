@@ -102,7 +102,7 @@ jobs:
           node <<'NODE'
           const crypto = require('node:crypto');
           const selectorContains = (html, selector, value) => selector.startsWith('[')
-            ? html.includes(`${selector.slice(1, -1)}="${value}"`)
+            ? html.includes(`${selector.slice(1, -1)}>${value}</`)
             : selector.startsWith('.')
               ? html.includes(`class="${selector.slice(1)}"`) && html.includes(value)
               : html.includes(`<${selector}>${value}</${selector}>`);

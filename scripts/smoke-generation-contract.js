@@ -57,8 +57,8 @@ for (const oldAnchor of ['data-catalog-key=', 'class="catalog-heading"', 'class=
 assert.ok(html.includes('class="stock-status"'), 'availability control must stay stable');
 assert.ok(html.includes('name="polygraph-generation" content="42"'), 'page must expose its generation marker');
 assert.equal(first.schema_version, 3);
-assert.equal(first.generator.version, 4);
-assert.equal(first.variant.profile, 'opaque-attribute-elements');
+assert.equal(first.generator.version, 5);
+assert.equal(first.variant.profile, 'seeded-dom-text-elements');
 assert.equal(first.contract_version, 'polygraph-owned-product/v1');
 assert.equal(first.template_sha256, crypto.createHash('sha256').update(fs.readFileSync(canonical)).digest('hex'));
 assert.equal(first.html_sha256, crypto.createHash('sha256').update(fs.readFileSync(one)).digest('hex'));
@@ -69,13 +69,21 @@ for (const [selector, value] of Object.entries({
   [first.anchors.price]: '£51.77',
   [first.anchors.product_code]: 'Product/Code-123',
 })) {
-  assert.ok(html.includes(`${selector.slice(1, -1)}="${value}"`), `${selector} must preserve its value in a randomized attribute`);
+  assert.ok(html.includes(`${selector.slice(1, -1)}>${value}</`), `${selector} must resolve to a real DOM text node`);
 }
 const renderedText = html.replace(/<[^>]*>/g, '');
 for (const value of ['Product/Code-123', 'Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue', '£51.77']) {
-  assert.ok(!renderedText.includes(value), `${value} must not remain in a generated text node`);
+  assert.ok(renderedText.includes(value), `${value} must remain in a generated text node`);
 }
 assert.ok(html.includes('data-polygraph-presentation='), 'generated HTML must include a presentation contract for opaque elements');
+
+const visibleText = (page) => page
+  .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+  .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+  .replace(/<[^>]*>/g, ' ')
+  .replace(/\s+/g, ' ')
+  .trim();
+assert.equal(visibleText(html), visibleText(fs.readFileSync(canonical, 'utf8')), 'generated page must preserve the exact visible copy and order');
 
 for (const tag of new Set([...html.matchAll(/<\/?(pg-(?:detail|title|offer|price|spec-grid|label|value|code)-[a-f0-9]{12})(?:\s[^>]*)?>/g)].map((match) => match[1]))) {
   const opens = (html.match(new RegExp(`<${tag}(?:\\s[^>]*)?>`, 'g')) || []).length;

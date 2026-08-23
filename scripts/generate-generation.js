@@ -18,6 +18,10 @@ function digest(seed, field) {
   return crypto.createHash('sha256').update(`${seed}:${field}`).digest('hex').slice(0, 12);
 }
 
+function seededChoice(token, values) {
+  return values[Number.parseInt(token.slice(0, 2), 16) % values.length];
+}
+
 function assertToken(name, value) {
   if (!/^[A-Za-z0-9._:-]{1,160}$/.test(value)) {
     throw new Error(`${name} may contain only letters, numbers, ., _, :, and -`);
@@ -82,28 +86,32 @@ const tags = {
   title: `pg-title-${tokens.title}`,
   price: `pg-price-${tokens.price}`,
 };
-const productCodeOpen = `<${tags.product_code} ${attributes.product_code}="Product/Code-123">`;
-const productCodeClose = `</${tags.product_code}>`;
+const textTags = {
+  product_code: seededChoice(tokens.product_code, ['span', 'b', 'em']),
+  title: seededChoice(tokens.title, ['span', 'b', 'em']),
+  price: seededChoice(tokens.price, ['span', 'b', 'em']),
+};
+const productCodeOpen = `<${tags.product_code}><${textTags.product_code} ${attributes.product_code}>Product/Code-123`;
+const productCodeClose = `</${textTags.product_code}></${tags.product_code}>`;
 const labelOpen = `<${tags.label}>`;
 const labelClose = `</${tags.label}>`;
 const valueOpen = `<${tags.value}>`;
 const valueClose = `</${tags.value}>`;
 
-// The generated page deliberately has no text-node or semantic extraction
-// fallback for the three monitored fields. Each seed changes their tag names,
-// attributes, and surrounding hierarchy while generated CSS keeps the visual
-// page fixed. A healed scraper must deliberately bind getAttribute to the
-// recorded anchor rather than recover a broad semantic text selector.
+// Each seed changes the custom wrapper names, normal text wrappers, attributes,
+// and surrounding hierarchy for the three monitored fields. Their values stay
+// in real DOM text nodes so a provider can preview and validate a healed parser,
+// while generated CSS keeps the visible product page fixed.
 let html = sourceHtml
   .replace('<section class="identity">', `<${tags.detail}>`)
   .replace(
     '<div class="catalog-heading" role="heading" aria-level="1">Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue</div><div class="rating">',
-    `<${tags.title} ${attributes.title}="Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue"></${tags.title}><div class="rating">`,
+    `<${tags.title}><${textTags.title} ${attributes.title}>Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue</${textTags.title}></${tags.title}><div class="rating">`,
   )
   .replace('<div class="pricebox">', `<${tags.offer}>`)
   .replace(
     '<p class="commerce-amount" aria-label="product amount">£51.77</p><p class="rrp">',
-    `<${tags.price} ${attributes.price}="£51.77"></${tags.price}><p class="rrp">`,
+    `<${tags.price}><${textTags.price} ${attributes.price}>£51.77</${textTags.price}></${tags.price}><p class="rrp">`,
   )
   .replace('</div><dl class="specs">', `</${tags.offer}><${tags.specs}>`)
   .replaceAll('<dt>', labelOpen)
@@ -116,14 +124,14 @@ let html = sourceHtml
 const presentation = `<style data-polygraph-presentation="${tokens.detail}">` +
   `${tags.detail}{display:block}` +
   `${tags.title}{display:block;font-size:25px;line-height:1.24;font-weight:500;text-wrap:balance;margin:0 0 9px}` +
-  `${tags.title}::before{content:attr(${attributes.title})}` +
+  `[${attributes.title}]{display:contents;font:inherit;color:inherit}` +
   `${tags.offer}{display:block;border-top:1px solid var(--line);padding-top:13px}` +
   `${tags.price}{display:block;font-size:31px;letter-spacing:-1.5px;color:var(--red);margin:2px 0 7px}` +
-  `${tags.price}::before{content:attr(${attributes.price})}` +
+  `[${attributes.price}]{display:contents;font:inherit;color:inherit}` +
   `${tags.specs}{display:grid;grid-template-columns:110px 1fr;gap:8px 12px;line-height:1.35;margin:1em 0}` +
   `${tags.label}{font-weight:bold}` +
   `${tags.value},${tags.product_code}{margin:0}` +
-  `${tags.product_code}::before{content:attr(${attributes.product_code})}` +
+  `[${attributes.product_code}]{display:contents;font:inherit;color:inherit}` +
   `</style>`;
 html = html.replace('</head>', `${presentation}</head>`);
 
@@ -150,12 +158,12 @@ const manifest = {
   parent_generation: parentGeneration,
   seed,
   mission_id: missionId,
-  generator: { name: 'evolve-store', version: 4 },
+  generator: { name: 'evolve-store', version: 5 },
   canonical_source: path.relative(process.cwd(), source).replaceAll('\\', '/'),
   template_sha256: sourceSha256,
   html_sha256: crypto.createHash('sha256').update(html).digest('hex'),
   variant: {
-    profile: 'opaque-attribute-elements',
+    profile: 'seeded-dom-text-elements',
     selector_digest: crypto.createHash('sha256').update(JSON.stringify(anchors)).digest('hex').slice(0, 16),
   },
   anchors,

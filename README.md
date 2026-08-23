@@ -31,14 +31,14 @@ The generator changes only the DOM anchors for product code, title and price. Th
   "mission_id": "...",
   "anchors": {
     "product_code": "[data-pg-code-…]",
-    "title": ".pg-title-…",
-    "price": ".pg-price-…",
+    "title": "[data-pg-title-…]",
+    "price": "[data-pg-price-…]",
     "availability": ".stock-status"
   }
 }
 ```
 
-The seed makes a changed page reproducible; GitHub commits make every production state inspectable.
+The seed makes a changed page reproducible; GitHub commits make every production state inspectable. Generated product code, title, and price anchors contain real DOM text so provider healing previews can be validated before approval, while their normal/custom wrappers and selectors still change between generations.
 
 ## Evolving the live page
 
