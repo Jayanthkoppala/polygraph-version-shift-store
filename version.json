@@ -1,17 +1,41 @@
 {
-  "version": "v3",
-  "generation": 1787443484940,
-  "source": "versions/v3.html",
-  "source_sha256": "8104606c1700a7c640eff2e31d535943b7c707a5187683f579f5bfd0e5870909",
-  "published_at": "2026-08-23T00:04:51.000Z",
-  "cache": "rev-v3-1787443484940",
-  "mission_id": "260adcec-0b2c-42dc-b87c-7ed0ed6101b5",
-  "mutation": "none",
+  "version": "evolving",
+  "schema_version": 2,
+  "contract_version": "polygraph-owned-product/v1",
+  "generation": 1787443484941,
+  "parent_generation": 1787443484940,
+  "seed": "pg_1787443484941_575861c4cdd24eedbb76b5c1",
+  "mission_id": "575861c4-cdd2-4eed-bb76-b5c18b712adb",
+  "generator": {
+    "name": "evolve-store",
+    "version": 1
+  },
+  "canonical_source": "versions/v2.html",
+  "template_sha256": "a173889dc9a3ccbf36793002a8cf3bf1450043a412b2d1975b20d6b83623f1ba",
+  "html_sha256": "878cc022ff77e7845ba4f2a7d754b5c4dd0e5a1f104d7d3b379ec8c669fb80b7",
+  "anchors": {
+    "product_code": "[data-pg-code-bf16197fca9a]",
+    "title": ".pg-title-41ae0f9e9100",
+    "price": ".pg-price-7943d58960d4",
+    "availability": ".stock-status"
+  },
+  "invariants": {
+    "product_code": "Product/Code-123",
+    "title_sha256": "c47247868b13ad6e4e9937e6febd4b00477ff8f3ca888e7d6f22d42937adfb6d",
+    "price": {
+      "value": 51.77,
+      "currency": "GBP",
+      "symbol": "£"
+    },
+    "availability": "In stock"
+  },
+  "published_at": "2026-08-23T04:00:35.000Z",
+  "cache": "generation-1787443484941-pg_1787443484941_575861c4cdd24eedbb76b5c1",
   "commits": [
-    "a1ccadb1cf5ee00a69903abf79dc341ce5d0e073",
-    "4b69c34b89f618d1e1e10b38fbd5811d2a9c759e",
-    "1c2b0c1e99df6595f60c6f3100e67600bff0a549",
-    "2dcd036f557d3d14f0b8942e7c426cc9345f8cc6",
-    "4081576be1f92380070984225be05d4e7b94c6c4"
+    "8e332df1f6a326f40266fad44df0650c1f9c694d",
+    "62a7ad598492181617b70f1a7027122fea5eb36a",
+    "0d3a3f705ec7b50e182d924cec142a57af8073f1",
+    "42ae6236c95dd9a1842f717c562b26204f30698d",
+    "a1ccadb1cf5ee00a69903abf79dc341ce5d0e073"
   ]
 }
