@@ -1,6 +1,6 @@
 name: evolve-store
 
-run-name: Evolve fixture generation ${{ inputs.generation }}
+run-name: Evolve fixture generation ${{ inputs.generation }} for mission ${{ inputs.mission_id }}
 
 on:
   workflow_dispatch:
