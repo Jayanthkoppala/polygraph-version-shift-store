@@ -2,26 +2,26 @@
   "version": "evolving",
   "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484952,
-  "parent_generation": 1787443484951,
-  "seed": "pg_1787443484952_123b985eeb394d47b5e921f6",
-  "mission_id": "123b985e-eb39-4d47-b5e9-21f64553e996",
+  "generation": 1787443484953,
+  "parent_generation": 1787443484952,
+  "seed": "baseline_v11_1787443484953",
+  "mission_id": "52896314-7496-4083-85d9-a3b61d353328",
   "generator": {
-    "name": "evolve-store",
-    "version": 5
+    "name": "one-time-parser-baseline",
+    "version": 1
   },
   "canonical_source": "versions/v2.html",
   "template_sha256": "cc971399aa190abe86bb252568c25d969febbf4bd57e9c8a87c89905217a7bd7",
-  "html_sha256": "1f72443a7fd977679d740440e6a52dda9b62e5f6b9053fb134def0a6df307f52",
+  "html_sha256": "e4c2a4efc790d07d0e2842ba5a7ea577655b4f748a444aac89083b44b32cd3d6",
   "variant": {
-    "profile": "seeded-dom-text-elements",
-    "selector_digest": "adc01b6dd275bb51"
+    "profile": "parser-v11-baseline",
+    "selector_digest": "ccf82ce56236d2ab"
   },
   "anchors": {
-    "product_code": "[data-pg-code-b0f668c0e715]",
-    "title": "[data-pg-title-80f779662639]",
-    "price": "[data-pg-price-853a464a87df]",
-    "availability": ".stock-status"
+    "product_code": "dt:contains(Product code) + dd",
+    "title": ".identity [data-product-copy=headline]",
+    "price": "[aria-label=product amount]",
+    "availability": ".buybox h2"
   },
   "invariants": {
     "product_code": "Product/Code-123",
@@ -33,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T15:45:41.000Z",
-  "cache": "generation-1787443484952-pg_1787443484952_123b985eeb394d47b5e921f6",
+  "published_at": "2026-08-23T16:36:57.000Z",
+  "cache": "generation-1787443484953-baseline_v11_1787443484953",
   "commits": [
+    "a14685d58b553e1e9e1f65b8d733ac29caff8568",
     "2ec771639c965feeace24df5a489def66b58a339",
     "498e2ebfdc3ce2cee9b5a89f2136a2d4640a9722",
     "ed1f61da5c4edca80c057dcafcdb78dd6d45e0ed",
-    "925b29dd6765a2cf8daf28041050d3ad5ec95921",
-    "5fcfc4a6bc02b6dd67964f1be9baca0b5227dc6b"
+    "925b29dd6765a2cf8daf28041050d3ad5ec95921"
   ]
 }
