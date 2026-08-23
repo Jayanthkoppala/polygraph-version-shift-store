@@ -2,25 +2,25 @@
   "version": "evolving",
   "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484962,
-  "parent_generation": 1787443484961,
-  "seed": "pg_1787443484962_d308458132e148ceabc6aacd",
-  "mission_id": "d3084581-32e1-48ce-abc6-aacdbdb6b5bf",
+  "generation": 1787443484963,
+  "parent_generation": 1787443484962,
+  "seed": "pg_1787443484963_79cd59c78efb477291d2272a",
+  "mission_id": "79cd59c7-8efb-4772-91d2-272a1c0fc52c",
   "generator": {
     "name": "evolve-store",
     "version": 5
   },
   "canonical_source": "versions/v2.html",
   "template_sha256": "cc971399aa190abe86bb252568c25d969febbf4bd57e9c8a87c89905217a7bd7",
-  "html_sha256": "faf41490f8eb8ec1eaf11f7b5de268d283e57a2b0b6c3ad8cde47aba884a2d5a",
+  "html_sha256": "a5f7e0d708f18b46ca6bcbba0debdf57746239b066b90b6c8b6829481f160c8b",
   "variant": {
     "profile": "seeded-dom-text-elements",
-    "selector_digest": "62a693e28ee7f921"
+    "selector_digest": "c11cbc55e192c87e"
   },
   "anchors": {
-    "product_code": "[data-pg-code-7774ac629b9a]",
-    "title": "[data-pg-title-9a36c44e006b]",
-    "price": "[data-pg-price-c0a3c4cc4554]",
+    "product_code": "[data-pg-code-0e83298fb93c]",
+    "title": "[data-pg-title-03c1b7b5d193]",
+    "price": "[data-pg-price-a85e08737c1e]",
     "availability": ".stock-status"
   },
   "invariants": {
@@ -33,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T20:12:35.000Z",
-  "cache": "generation-1787443484962-pg_1787443484962_d308458132e148ceabc6aacd",
+  "published_at": "2026-08-23T20:14:58.000Z",
+  "cache": "generation-1787443484963-pg_1787443484963_79cd59c78efb477291d2272a",
   "commits": [
+    "1f8b4a4e42c6bd35f580e40df9771f42b6c9b11e",
     "08b3f2e861e1c252ddab084f3e95e66dfe8576a2",
     "b49ce8c8f887a8af76ec95b96a97a1d9a2d8658b",
     "6008591af7226fca0ebd9a5e58c266b67ba6ad3e",
-    "578817f4dd07a934bd2343a4c2527bb44467d6f4",
-    "89eba59651d2c0fbda3c57dad16736685a3def67"
+    "578817f4dd07a934bd2343a4c2527bb44467d6f4"
   ]
 }
