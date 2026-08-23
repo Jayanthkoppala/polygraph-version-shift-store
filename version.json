@@ -2,25 +2,25 @@
   "version": "evolving",
   "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484944,
-  "parent_generation": 1787443484943,
-  "seed": "pg_1787443484944_f2e35eaccbd44bce8c88575b",
-  "mission_id": "f2e35eac-cbd4-4bce-8c88-575b4eaf122d",
+  "generation": 1787443484945,
+  "parent_generation": 1787443484944,
+  "seed": "pg_1787443484945_ae1023c0d80c4aefaf56e029",
+  "mission_id": "ae1023c0-d80c-4aef-af56-e029aee4c4b5",
   "generator": {
     "name": "evolve-store",
     "version": 2
   },
   "canonical_source": "versions/v2.html",
   "template_sha256": "cc971399aa190abe86bb252568c25d969febbf4bd57e9c8a87c89905217a7bd7",
-  "html_sha256": "5e5a99a6b044ef8a54c287d2ceac7d809c9c755b96e9c740532f84d970353c71",
+  "html_sha256": "5dfc767d98e4ac533fda58136597ed8afa0bb7dbadbbda942b0cc79eacada12e",
   "variant": {
-    "profile": "catalog-attributes",
-    "selector_digest": "0d310e698d667e05"
+    "profile": "product-properties",
+    "selector_digest": "ebfe54417d514eb9"
   },
   "anchors": {
-    "product_code": "[data-pg-code-0d595cb318cc]",
-    "title": "[data-pg-title-1dde0725727d]",
-    "price": "[data-pg-price-7974da8a3bb4]",
+    "product_code": "[data-product-reference-0dea3e237133]",
+    "title": ".product-name-6d2f0f14ca1b",
+    "price": ".offer-value-73ee72f64467",
     "availability": ".stock-status"
   },
   "invariants": {
@@ -33,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T13:09:30.000Z",
-  "cache": "generation-1787443484944-pg_1787443484944_f2e35eaccbd44bce8c88575b",
+  "published_at": "2026-08-23T13:22:39.000Z",
+  "cache": "generation-1787443484945-pg_1787443484945_ae1023c0d80c4aefaf56e029",
   "commits": [
+    "f519796d08eecff44f125be530673b7695f93cee",
     "29a57d3aa35751d46df39ad05ea47d0749d4d3ce",
     "42f70653948a0edc3b1e1f69638735f6dd36125f",
     "d8a0a3b85a88fd4be6cce2c194ff012d7fc08dd3",
-    "58309fd083086087fce7452730f403320a7f6f02",
-    "6ad6f59cec71ddc76e16d906d96fb0eab4767dd8"
+    "58309fd083086087fce7452730f403320a7f6f02"
   ]
 }
