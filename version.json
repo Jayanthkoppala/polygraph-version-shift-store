@@ -2,26 +2,26 @@
   "version": "evolving",
   "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484948,
-  "parent_generation": 1787443484947,
-  "seed": "baseline_v11_1787443484948",
-  "mission_id": "b09e814d-2d58-4214-bede-2b4022fe5969",
+  "generation": 1787443484949,
+  "parent_generation": 1787443484948,
+  "seed": "pg_1787443484949_04aa1e7f5d634d9f87c077df",
+  "mission_id": "04aa1e7f-5d63-4d9f-87c0-77dfcdb93f4c",
   "generator": {
-    "name": "one-time-parser-baseline",
-    "version": 1
+    "name": "evolve-store",
+    "version": 4
   },
   "canonical_source": "versions/v2.html",
   "template_sha256": "cc971399aa190abe86bb252568c25d969febbf4bd57e9c8a87c89905217a7bd7",
-  "html_sha256": "8c68d48b9496d769dc512c1d355a1d1fc9df9be9ac6f167a37faabefa4b84057",
+  "html_sha256": "b86eeaeeea8eddabe2f7785afa0d48cbfe6dd9a7edb0fcfa9411c301af9440eb",
   "variant": {
-    "profile": "parser-v11-baseline",
-    "selector_digest": "ccf82ce56236d2ab"
+    "profile": "opaque-attribute-elements",
+    "selector_digest": "d874a959505d6983"
   },
   "anchors": {
-    "product_code": "dt:contains(Product code) + dd",
-    "title": ".identity [data-product-copy=headline]",
-    "price": "[aria-label=product amount]",
-    "availability": ".buybox h2"
+    "product_code": "[data-pg-code-242e84ad237a]",
+    "title": "[data-pg-title-87dd8f95811f]",
+    "price": "[data-pg-price-8b015e923e9e]",
+    "availability": ".stock-status"
   },
   "invariants": {
     "product_code": "Product/Code-123",
@@ -33,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T15:04:18.000Z",
-  "cache": "generation-1787443484948-baseline_v11_1787443484948",
+  "published_at": "2026-08-23T15:27:49.000Z",
+  "cache": "generation-1787443484949-pg_1787443484949_04aa1e7f5d634d9f87c077df",
   "commits": [
+    "5fcfc4a6bc02b6dd67964f1be9baca0b5227dc6b",
     "94d7379c237f368e078c5e736dbb9193371f3be8",
     "4fa3195391fe76271d6281c7bf9e5476ae58761a",
     "7cb775813d45804f71b17ac86b532b2b4270aadf",
-    "79519914b84907f69e6619af0b29d6cc933ef7fa",
-    "00b321ee44e9b5d07f4f2cbe565fc357a47d21e9"
+    "79519914b84907f69e6619af0b29d6cc933ef7fa"
   ]
 }
