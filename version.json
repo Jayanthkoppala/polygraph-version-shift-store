@@ -2,25 +2,25 @@
   "version": "evolving",
   "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484961,
-  "parent_generation": 1787443484960,
-  "seed": "pg_1787443484961_215c988e9fef45769f5fe903",
-  "mission_id": "215c988e-9fef-4576-9f5f-e903d3b8a1ac",
+  "generation": 1787443484962,
+  "parent_generation": 1787443484961,
+  "seed": "pg_1787443484962_d308458132e148ceabc6aacd",
+  "mission_id": "d3084581-32e1-48ce-abc6-aacdbdb6b5bf",
   "generator": {
     "name": "evolve-store",
     "version": 5
   },
   "canonical_source": "versions/v2.html",
   "template_sha256": "cc971399aa190abe86bb252568c25d969febbf4bd57e9c8a87c89905217a7bd7",
-  "html_sha256": "5c7dab025951ed6b9957920d76f893c8cf13812cc3d36c8aa83b697d97cec7a9",
+  "html_sha256": "faf41490f8eb8ec1eaf11f7b5de268d283e57a2b0b6c3ad8cde47aba884a2d5a",
   "variant": {
     "profile": "seeded-dom-text-elements",
-    "selector_digest": "9081b7cb05496c16"
+    "selector_digest": "62a693e28ee7f921"
   },
   "anchors": {
-    "product_code": "[data-pg-code-039185ae0125]",
-    "title": "[data-pg-title-9b4ed8756a8d]",
-    "price": "[data-pg-price-136123e9605e]",
+    "product_code": "[data-pg-code-7774ac629b9a]",
+    "title": "[data-pg-title-9a36c44e006b]",
+    "price": "[data-pg-price-c0a3c4cc4554]",
     "availability": ".stock-status"
   },
   "invariants": {
@@ -33,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T20:10:22.000Z",
-  "cache": "generation-1787443484961-pg_1787443484961_215c988e9fef45769f5fe903",
+  "published_at": "2026-08-23T20:12:35.000Z",
+  "cache": "generation-1787443484962-pg_1787443484962_d308458132e148ceabc6aacd",
   "commits": [
+    "08b3f2e861e1c252ddab084f3e95e66dfe8576a2",
     "b49ce8c8f887a8af76ec95b96a97a1d9a2d8658b",
     "6008591af7226fca0ebd9a5e58c266b67ba6ad3e",
     "578817f4dd07a934bd2343a4c2527bb44467d6f4",
-    "89eba59651d2c0fbda3c57dad16736685a3def67",
-    "b737b23ae18d0119f39954a9015c1d5e4e8be674"
+    "89eba59651d2c0fbda3c57dad16736685a3def67"
   ]
 }
