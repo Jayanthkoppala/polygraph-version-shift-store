@@ -2,25 +2,25 @@
   "version": "evolving",
   "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484942,
-  "parent_generation": 1787443484941,
-  "seed": "pg_1787443484942_cf963be86ae148189f8ccc67",
-  "mission_id": "cf963be8-6ae1-4818-9f8c-cc6707d1a656",
+  "generation": 1787443484943,
+  "parent_generation": 1787443484942,
+  "seed": "pg_1787443484943_f2e35eaccbd44bce8c88575b",
+  "mission_id": "f2e35eac-cbd4-4bce-8c88-575b4eaf122d",
   "generator": {
     "name": "evolve-store",
     "version": 2
   },
   "canonical_source": "versions/v2.html",
-  "template_sha256": "a173889dc9a3ccbf36793002a8cf3bf1450043a412b2d1975b20d6b83623f1ba",
-  "html_sha256": "a4c5ae85bfe3bb1c2341aa13c667abfbc68ccadad6293bba581cd95d19cc3d8a",
+  "template_sha256": "cc971399aa190abe86bb252568c25d969febbf4bd57e9c8a87c89905217a7bd7",
+  "html_sha256": "85739550cb9d1cf445c10035c58e282f859345e35cf0d04695367d831e11b6e6",
   "variant": {
-    "profile": "catalog-attributes",
-    "selector_digest": "9415e9bd434cf1ba"
+    "profile": "product-properties",
+    "selector_digest": "bb06341007e0a1b5"
   },
   "anchors": {
-    "product_code": "[data-pg-code-cc84b692acc0]",
-    "title": "[data-pg-title-44b12ce3b3ff]",
-    "price": "[data-pg-price-71d439a9b90c]",
+    "product_code": "[data-product-reference-f9dafe9c28f1]",
+    "title": ".product-name-d51e930e5ccb",
+    "price": ".offer-value-c9bd268e303e",
     "availability": ".stock-status"
   },
   "invariants": {
@@ -33,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T04:42:00.000Z",
-  "cache": "generation-1787443484942-pg_1787443484942_cf963be86ae148189f8ccc67",
+  "published_at": "2026-08-23T13:09:06.000Z",
+  "cache": "generation-1787443484943-pg_1787443484943_f2e35eaccbd44bce8c88575b",
   "commits": [
+    "42f70653948a0edc3b1e1f69638735f6dd36125f",
+    "d8a0a3b85a88fd4be6cce2c194ff012d7fc08dd3",
     "58309fd083086087fce7452730f403320a7f6f02",
     "6ad6f59cec71ddc76e16d906d96fb0eab4767dd8",
-    "8e332df1f6a326f40266fad44df0650c1f9c694d",
-    "62a7ad598492181617b70f1a7027122fea5eb36a",
-    "0d3a3f705ec7b50e182d924cec142a57af8073f1"
+    "8e332df1f6a326f40266fad44df0650c1f9c694d"
   ]
 }
