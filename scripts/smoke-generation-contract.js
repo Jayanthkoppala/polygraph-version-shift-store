@@ -44,9 +44,9 @@ assert.equal(first.seed, 'pg_42_a81f');
 assert.equal(first.mission_id, 'mission-contract-test');
 assert.deepEqual(Object.keys(first.anchors).sort(), ['availability', 'price', 'product_code', 'title']);
 assert.equal(first.anchors.availability, '.stock-status');
-assert.ok(first.anchors.product_code.startsWith('[data-pg-code-'));
-assert.ok(first.anchors.title.startsWith('.pg-title-'));
-assert.ok(first.anchors.price.startsWith('.pg-price-'));
+assert.ok(first.anchors.product_code.startsWith('[data-'));
+assert.ok(first.anchors.title.startsWith('.') || first.anchors.title.startsWith('[data-'));
+assert.ok(first.anchors.price.startsWith('.') || first.anchors.price.startsWith('[data-'));
 
 for (const value of ['Product/Code-123', 'Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue', '£51.77', 'In stock']) {
   assert.ok(html.includes(value), `generated HTML must preserve ${value}`);
@@ -56,10 +56,27 @@ for (const oldAnchor of ['data-catalog-key=', 'class="catalog-heading"', 'class=
 }
 assert.ok(html.includes('class="stock-status"'), 'availability control must stay stable');
 assert.ok(html.includes('name="polygraph-generation" content="42"'), 'page must expose its generation marker');
-assert.equal(first.schema_version, 2);
+assert.equal(first.schema_version, 3);
+assert.equal(first.generator.version, 2);
+assert.ok(['catalog-attributes', 'product-properties', 'offer-schema'].includes(first.variant.profile));
 assert.equal(first.contract_version, 'polygraph-owned-product/v1');
 assert.equal(first.template_sha256, crypto.createHash('sha256').update(fs.readFileSync(canonical)).digest('hex'));
 assert.equal(first.html_sha256, crypto.createHash('sha256').update(fs.readFileSync(one)).digest('hex'));
 assert.deepEqual(first.invariants.price, { value: 51.77, currency: 'GBP', symbol: '£' });
+
+const parentState = path.join(temporary, 'parent-version.json');
+fs.writeFileSync(parentState, `${JSON.stringify({ generation: 42, anchors: first.anchors, variant: first.variant }, null, 2)}\n`);
+const child = JSON.parse(execFileSync(process.execPath, [generator,
+  '--source', canonical,
+  '--output', path.join(temporary, 'child.html'),
+  '--generation', '43',
+  '--parent-generation', '42',
+  '--seed', 'pg_child_43',
+  '--mission-id', 'mission-contract-child',
+  '--parent-state', parentState,
+  '--manifest-only',
+], { encoding: 'utf8' }));
+assert.notEqual(child.variant.profile, first.variant.profile, 'successive generation must choose a different structural profile');
+assert.notDeepEqual(child.anchors, first.anchors, 'successive generation must change extraction anchors');
 
 console.log('✓ seeded generation contract is deterministic and preserves the product contract');
