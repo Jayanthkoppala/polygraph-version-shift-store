@@ -1,92 +1,57 @@
-const crypto = require('crypto');
-const { execFileSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+const crypto = require('node:crypto');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const root = path.join(__dirname, '..');
+const read = (file) => fs.readFileSync(file, 'utf8');
+const option = (name) => { const at = process.argv.indexOf(name); return at === -1 ? undefined : process.argv[at + 1]; };
+const fail = (message) => { console.error(`✗ ${message}`); process.exit(1); };
+const pass = (message) => console.log(`✓ ${message}`);
+const sha256 = (value) => crypto.createHash('sha256').update(value).digest('hex');
 
-function read(file) {
-  return fs.readFileSync(path.join(root, file), 'utf8');
+const expectedGeneration = Number(option('--generation'));
+const expectedParent = Number(option('--parent-generation'));
+const expectedSeed = option('--seed');
+const expectedMission = option('--mission-id');
+const statePath = option('--state') || path.join(root, 'version.json');
+const indexPath = option('--index') || path.join(root, 'index.html');
+if (!Number.isSafeInteger(expectedGeneration) || expectedGeneration <= 0) fail('pass --generation <positive integer>');
+if (!Number.isSafeInteger(expectedParent) || expectedParent < 0) fail('pass --parent-generation <non-negative integer>');
+if (!expectedSeed || !expectedMission) fail('pass --seed and --mission-id');
+
+const manifest = JSON.parse(read(statePath));
+const index = read(indexPath);
+const canonical = read(path.join(root, 'versions/v2.html'));
+const expectedKeys = ['anchors', 'cache', 'canonical_source', 'commits', 'generation', 'mission_id', 'parent_generation', 'published_at', 'seed', 'source_sha256', 'version'];
+if (JSON.stringify(Object.keys(manifest).sort()) !== JSON.stringify(expectedKeys)) fail(`manifest schema mismatch: ${Object.keys(manifest).join(', ')}`);
+if (manifest.version !== 'evolving') fail('manifest version must be evolving');
+if (manifest.generation !== expectedGeneration || manifest.parent_generation !== expectedParent || manifest.seed !== expectedSeed || manifest.mission_id !== expectedMission) fail('manifest marker does not match requested evolution');
+if (manifest.canonical_source !== 'versions/v2.html') fail('canonical source must remain versions/v2.html');
+if (manifest.source_sha256 !== sha256(canonical)) fail('canonical source SHA does not match versions/v2.html');
+if (manifest.cache !== `generation-${expectedGeneration}-${expectedSeed}`) fail('cache marker does not match generation and seed');
+if (typeof manifest.published_at !== 'string' || Number.isNaN(Date.parse(manifest.published_at))) fail('published_at must be ISO timestamp');
+if (!Array.isArray(manifest.commits)) fail('commits must be an array');
+pass('manifest records deterministic generation evidence');
+
+const requiredFields = ['availability', 'price', 'product_code', 'title'];
+if (!manifest.anchors || JSON.stringify(Object.keys(manifest.anchors).sort()) !== JSON.stringify(requiredFields)) fail('anchors must contain exactly the four contract fields');
+const { product_code: productCode, title, price, availability } = manifest.anchors;
+if (!/^\[data-pg-code-[a-f0-9]{12}\]$/.test(productCode)) fail('product_code anchor is invalid');
+if (!/^\.pg-title-[a-f0-9]{12}$/.test(title)) fail('title anchor is invalid');
+if (!/^\.pg-price-[a-f0-9]{12}$/.test(price)) fail('price anchor is invalid');
+if (availability !== '.stock-status') fail('availability control must remain .stock-status');
+pass('manifest identifies three changed anchors and one stable control');
+
+for (const value of ['Product/Code-123', 'Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue', '£51.77', 'In stock']) {
+  if (!index.includes(value)) fail(`generated product page lost ${value}`);
 }
+if (!index.includes(`${productCode.slice(1, -1)}="Product/Code-123"`)) fail('generated product-code anchor is absent');
+if (!index.includes(`class="${title.slice(1)}"`)) fail('generated title anchor is absent');
+if (!index.includes(`class="${price.slice(1)}"`)) fail('generated price anchor is absent');
+if (!index.includes('class="stock-status"')) fail('stable availability control is absent');
+if (!index.includes(`name="polygraph-generation" content="${expectedGeneration}"`)) fail('generation marker absent from page');
+if (index.includes('data-catalog-key=') || index.includes('class="catalog-heading"') || index.includes('class="commerce-amount"')) fail('generated page retained canonical extraction anchors');
+pass('generated page preserves product meaning while changing exactly three extraction anchors');
 
-function fail(message) {
-  console.error(`✗ ${message}`);
-  process.exit(1);
-}
-
-function pass(message) {
-  console.log(`✓ ${message}`);
-}
-
-function sha256(value) {
-  return crypto.createHash('sha256').update(value).digest('hex');
-}
-
-function count(value, needle) {
-  return value.split(needle).length - 1;
-}
-
-function option(name) {
-  const position = process.argv.indexOf(name);
-  return position === -1 ? undefined : process.argv[position + 1];
-}
-
-const target = option('--target');
-const state = option('--state') || 'version.json';
-const mutation = option('--mutation') || 'none';
-if (!['v1', 'v2', 'v3'].includes(target)) fail('pass --target v1, --target v2, or --target v3');
-
-const manifest = JSON.parse(read(state));
-const source = `versions/${target}.html`;
-const selected = read(source);
-const index = read('index.html');
-const expectedKeys = ['cache', 'commits', 'generation', 'mission_id', 'mutation', 'published_at', 'source', 'source_sha256', 'version'];
-const actualKeys = Object.keys(manifest).sort();
-
-if (JSON.stringify(actualKeys) !== JSON.stringify(expectedKeys)) {
-  fail(`manifest schema mismatch: expected ${expectedKeys.join(', ')}, found ${actualKeys.join(', ')}`);
-}
-pass('manifest has the complete fixture schema');
-
-if (manifest.version !== target) fail(`manifest version expected ${target}, found ${manifest.version}`);
-if (manifest.mutation !== mutation) fail(`manifest mutation expected ${mutation}, found ${manifest.mutation}`);
-if (!Number.isInteger(manifest.generation) || manifest.generation <= 0) fail('manifest generation must be a positive integer');
-if (manifest.source !== source) fail(`manifest source expected ${source}, found ${manifest.source}`);
-if (!/^[a-f0-9]{64}$/.test(manifest.source_sha256)) fail('manifest source_sha256 must be a SHA-256 hex digest');
-if (manifest.source_sha256 !== sha256(selected)) fail('manifest source_sha256 does not match selected source bytes');
-if (typeof manifest.published_at !== 'string' || Number.isNaN(Date.parse(manifest.published_at))) fail('manifest published_at must be an ISO timestamp');
-if (manifest.cache !== `rev-${target}-${manifest.generation}`) fail('manifest cache must match selected version and generation');
-if (manifest.mission_id !== null && (typeof manifest.mission_id !== 'string' || manifest.mission_id.length === 0)) fail('manifest mission_id must be null or a non-empty string');
-if (!['none', 'dom-drift', 'selector-break', 'decoy', 'metadata-only'].includes(manifest.mutation)) fail('manifest mutation is invalid');
-if (!Array.isArray(manifest.commits) || !manifest.commits.every((commit) => typeof commit === 'string' && /^[a-f0-9]{7,64}$/i.test(commit))) fail('manifest commits must be an array of commit SHAs');
-pass(`manifest targets ${target} generation ${manifest.generation} with matching SHA-256`);
-
-if (mutation === 'none' && index !== selected) fail(`index.html is not byte-identical to ${source}`);
-if (mutation === 'none') pass(`index.html is byte-identical to ${source}`);
-else pass(`index.html contains the requested ${mutation} mutation`);
-if (mutation === 'selector-break') {
-  if (index.includes('class="product-price"') || index.includes('class="money-widget__value"') || index.includes('class="commerce-amount"') || index.includes('class="listing-price__amount"')) fail('selector-break must remove every versioned price selector');
-  if (count(index, 'class="amount-value"') !== 1) fail('selector-break must publish exactly one replacement amount-value selector');
-  pass('selector-break removes the selected version price anchor exactly once');
-}
-
-for (const [version, html] of [['v1', read('versions/v1.html')], ['v2', read('versions/v2.html')], ['v3', read('versions/v3.html')]]) {
-  if (html.includes('meta name="fixture-price"')) fail(`${version} leaks the price through metadata`);
-  if (count(html, '£51.77') !== 1) fail(`${version} must expose the price exactly once`);
-  if (html.includes('<div>Price:</div>') || html.includes('<span>Price:</span>')) fail(`${version} leaks the price through evidence/footer markup`);
-}
-pass('price is absent from identical metadata and evidence/footer locations');
-
-const v1 = read('versions/v1.html');
-const v2 = read('versions/v2.html');
-const v3 = read('versions/v3.html');
-if (count(v1, 'class="money-widget__value"') !== 1 || !v1.includes('class="money-widget__value" aria-label="product amount">£51.77')) fail('V1 must expose the current .money-widget__value anchor exactly once');
-if (v2.includes('money-widget__value') || count(v2, 'class="commerce-amount"') !== 1 || !v2.includes('class="commerce-amount" aria-label="product amount">£51.77')) fail('V2 must expose the price only via the structurally different .commerce-amount selector');
-if (v3.includes('money-widget__value') || v3.includes('commerce-amount') || count(v3, 'class="listing-price__amount"') !== 1 || !v3.includes('class="listing-price__amount" aria-label="product amount">£51.77')) fail('V3 must expose the price only via the append-only .listing-price__amount selector');
-pass('V1, V2, and V3 selectors have the exact expected outcome');
-
-execFileSync(process.execPath, [path.join(root, 'scripts/smoke-source-contract.js')], { stdio: 'inherit' });
-
-if (!fs.existsSync(path.join(root, '.github/workflows/switch-version.yml'))) fail('workflow file missing');
-pass('workflow file exists');
-console.log('All target-aware fixture smoke checks passed.');
+if (!fs.existsSync(path.join(root, '.github/workflows/switch-version.yml'))) fail('evolution workflow missing');
+pass('evolution workflow exists');

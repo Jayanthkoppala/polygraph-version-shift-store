@@ -1,73 +1,63 @@
 # Northbound Market Fixture Store
 
-This repository hosts a static, public fixture product site used by the Polygraph demo.
-It simulates a real storefront page that can switch between three structurally different product
-versions while keeping the same product identity:
+This static public product page is the real target of the Polygraph proof. The product values never change; each successful mission evolves only the three extraction anchors that a scraper depends on.
+
+The live page advances as an append-only chain:
+
+```text
+current generation → next seeded generation → next seeded generation
+```
+
+The currently deployed generation is the next mission's healthy baseline. There is no reset loop and no runtime mock.
+
+## Stable product contract
 
 - Product code: `Product/Code-123`
+- Product: `Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue`
 - Price: `£51.77`
-- Product: `Aster Noise-Cancelling Headphones`
+- Availability: `In stock`
 
-## Repository contents
+The generator changes only the DOM anchors for product code, title and price. The availability anchor stays `.stock-status` as the control field.
 
-- `index.html` — Live fixture page served to scrapers (defaults to V1).
-- `version.json` — Current active fixture metadata (`version`, `generation`, `mission_id`, `source_sha256`, etc.).
-- `versions/v1.html`, `versions/v2.html`, and `versions/v3.html` — Immutable source snapshots.
-- `.github/workflows/switch-version.yml` — Manual workflow to publish a target version and deterministic mutation scenario.
-- `scripts/apply-mutation.js` — Reproducible DOM/selector/decoy mutation generator.
-- `vercel.json` — Runtime config, including no-store headers for `version.json`.
-- `scripts/smoke-fixture-check.js` — Local verification script.
+## Generation evidence
 
-## Deployment setup
+`version.json` records the current state:
 
-Live production fixture: <https://polygraph-version-shift-store.vercel.app>
+```json
+{
+  "generation": 42,
+  "parent_generation": 41,
+  "seed": "pg_42_a81f",
+  "mission_id": "...",
+  "anchors": {
+    "product_code": "[data-pg-code-…]",
+    "title": ".pg-title-…",
+    "price": ".pg-price-…",
+    "availability": ".stock-status"
+  }
+}
+```
 
-1. Create this repository on GitHub with `main` as the production branch.
-2. Import the repository into Vercel and deploy from `main`.
-3. Add the GitHub repository variable `POLYGRAPH_FIXTURE_URL` with the stable
-   Vercel production URL, without a trailing slash.
-4. Keep the workflow's generated-file permission at `contents: write`; it only
-   commits `index.html` and `version.json`.
+The seed makes a changed page reproducible; GitHub commits make every production state inspectable.
 
-The Vercel project is `jayanth137s-projects/polygraph-version-shift-store`.
+## Evolving the live page
 
-## How to switch versions manually
+Dispatch **evolve-store** from `main` with:
 
-1. Open the workflow: **Actions → switch-version → Run workflow**
-2. Select:
-   - `version`: `v1`, `v2`, or `v3` (semantic snapshot)
-   - `mutation`: `none`, `dom-drift`, `selector-break`, `decoy`, or `metadata-only`
-   - `generation`: a positive integer greater than the current `version.json`
-   - `mission_id`: the Polygraph mission ID
-   - `force`: normally `false`
-3. Run workflow
-4. Workflow behavior:
-   - Copies selected source file into `index.html`
-   - Updates `version.json` with:
-     - `version`
-     - `generation`
-     - `mission_id`
-     - `source_sha256`
-     - `published_at`
-     - `mutation`
-     - `commits`
-   - Runs the target-aware local smoke gate
-   - Pushes the generated state to `main` using `GITHUB_TOKEN`
-   - Polls the Vercel production alias until both `version.json` and the live
-     product HTML prove the exact requested state
+- `generation`: the next integer above `version.json.generation`
+- `parent_generation`: the current `version.json.generation`
+- `seed`: a unique deterministic token
+- `mission_id`: the Polygraph mission ID
 
-## Reset / rollback
+The workflow generates `index.html`, records the manifest, runs local smoke checks, commits to `main`, and waits for the Vercel production alias to prove the exact generation marker and generated anchors.
 
-- To return to V1, dispatch the workflow with `version=v1`, a new higher
-  generation, and the current mission ID.
-- To return to V2, use the same process with `version=v2`.
-- To advance to the append-only V3 selector contract, use `version=v3`.
-- Repeating the exact same version, generation, mission, and mutation is a no-op unless
-  `force=true`; a higher generation always advances the live marker.
+`versions/v2.html` is the canonical source template. `versions/v1.html` and `versions/v3.html` are retained as historical fixtures; the live workflow no longer switches between them.
 
-## Note
+## Local checks
 
-This repository is intentionally minimal and static for hackathon demo reliability:
-- No frameworks
-- No back-end runtime
-- Git + GitHub workflow-driven version switching only
+```bash
+node scripts/smoke-generation-contract.js
+node scripts/smoke-source-contract.js
+```
+
+The second check validates the canonical source and workflow. A generated-production smoke check is run by GitHub Actions after it writes the new `index.html` and `version.json`.

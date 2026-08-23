@@ -1,66 +1,42 @@
-name: switch-version
+name: evolve-store
 
-run-name: Publish ${{ inputs.version }} · generation ${{ inputs.generation }}
+run-name: Evolve fixture generation ${{ inputs.generation }}
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/switch-version.yml
   workflow_dispatch:
     inputs:
-      version:
-        description: Target fixture version
-        required: true
-        default: v1
-        type: choice
-        options:
-          - v1
-          - v2
-          - v3
-      mutation:
-        description: Deterministic fixture mutation scenario
-        required: true
-        default: none
-        type: choice
-        options:
-          - none
-          - dom-drift
-          - selector-break
-          - decoy
-          - metadata-only
       generation:
-        description: Positive integer greater than the live generation
+        description: Next positive generation number
+        required: true
+        type: string
+      parent_generation:
+        description: Current generation this evolution starts from
+        required: true
+        type: string
+      seed:
+        description: Deterministic generation seed
         required: true
         type: string
       mission_id:
         description: Polygraph mission identifier
         required: true
         type: string
-      force:
-        description: Publish even if this exact marker is already live
-        required: false
-        default: false
-        type: boolean
 
 concurrency:
-  group: fixture-production-switch
+  group: fixture-production-evolution
   cancel-in-progress: false
 
 jobs:
-  publish:
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+  evolve:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     env:
-      TARGET_VERSION: ${{ inputs.version }}
       TARGET_GENERATION: ${{ inputs.generation }}
+      PARENT_GENERATION: ${{ inputs.parent_generation }}
+      GENERATION_SEED: ${{ inputs.seed }}
       MISSION_ID: ${{ inputs.mission_id }}
-      # Older dispatches did not have this input; preserve the original v1/v2 behavior.
-      MUTATION: ${{ inputs.mutation || 'none' }}
-      FORCE_PUBLISH: ${{ inputs.force }}
       LIVE_URL: ${{ vars.POLYGRAPH_FIXTURE_URL }}
     steps:
       - name: Check out the production branch
@@ -69,94 +45,42 @@ jobs:
           ref: main
           fetch-depth: 10
 
-      - name: Validate the requested marker
+      - name: Validate the requested evolution
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "$TARGET_VERSION" != "v1" && "$TARGET_VERSION" != "v2" && "$TARGET_VERSION" != "v3" ]]; then
-            echo "Unsupported version: $TARGET_VERSION"
-            exit 1
-          fi
-          if [[ ! "$TARGET_GENERATION" =~ ^[1-9][0-9]*$ ]]; then
-            echo "generation must be a positive integer"
-            exit 1
-          fi
-          if [[ -z "$MISSION_ID" ]]; then
-            echo "mission_id is required"
-            exit 1
-          fi
-          case "$MUTATION" in none|dom-drift|selector-break|decoy|metadata-only) ;; *) echo "Unsupported mutation: $MUTATION"; exit 1 ;; esac
-          if [[ -z "$LIVE_URL" ]]; then
-            echo "Repository variable POLYGRAPH_FIXTURE_URL is required"
-            exit 1
-          fi
-
-      - name: Publish the selected immutable snapshot
-        id: publish
-        shell: bash
-        run: |
-          set -euo pipefail
-          SOURCE_FILE="versions/${TARGET_VERSION}.html"
-          test -f "$SOURCE_FILE"
-
-          CURRENT_VERSION=$(node -e "const m=require('./version.json');process.stdout.write(String(m.version))")
+          if [[ ! "$TARGET_GENERATION" =~ ^[1-9][0-9]*$ ]]; then echo "generation must be a positive integer"; exit 1; fi
+          if [[ ! "$PARENT_GENERATION" =~ ^[0-9]+$ ]]; then echo "parent_generation must be a non-negative integer"; exit 1; fi
+          if [[ ! "$GENERATION_SEED" =~ ^[A-Za-z0-9._:-]{1,160}$ ]]; then echo "seed has unsupported characters"; exit 1; fi
+          if [[ -z "$MISSION_ID" ]]; then echo "mission_id is required"; exit 1; fi
+          if [[ -z "$LIVE_URL" ]]; then echo "Repository variable POLYGRAPH_FIXTURE_URL is required"; exit 1; fi
           CURRENT_GENERATION=$(node -e "const m=require('./version.json');process.stdout.write(String(m.generation))")
-          CURRENT_MISSION=$(node -e "const m=require('./version.json');process.stdout.write(String(m.mission_id || ''))")
-          if (( TARGET_GENERATION < CURRENT_GENERATION )); then
-            echo "generation $TARGET_GENERATION is older than live generation $CURRENT_GENERATION"
-            exit 1
-          fi
-          if (( TARGET_GENERATION == CURRENT_GENERATION )); then
-            if [[ "$FORCE_PUBLISH" != "true" && "$CURRENT_VERSION" == "$TARGET_VERSION" && "$CURRENT_MISSION" == "$MISSION_ID" ]] && cmp -s "$SOURCE_FILE" index.html; then
-              echo "This exact version, generation, and mission marker is already published."
-              echo "changed=false" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            echo "generation $TARGET_GENERATION already belongs to a different published state"
-            exit 1
-          fi
-          if [[ "$FORCE_PUBLISH" != "true" && "$CURRENT_VERSION" == "$TARGET_VERSION" && "$CURRENT_MISSION" == "$MISSION_ID" ]] && cmp -s "$SOURCE_FILE" index.html; then
-            echo "This exact version and mission marker is already published."
-            echo "A higher generation was requested, so the live marker will still advance."
-          fi
+          if [[ "$PARENT_GENERATION" != "$CURRENT_GENERATION" ]]; then echo "parent_generation must match live generation"; exit 1; fi
+          if (( TARGET_GENERATION <= CURRENT_GENERATION )); then echo "generation must advance"; exit 1; fi
 
-          node scripts/apply-mutation.js "$SOURCE_FILE" index.html "$MUTATION"
-          SOURCE_SHA256=$(shasum -a 256 "$SOURCE_FILE" | awk '{print $1}')
-          PUBLISHED_AT=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
-          export SOURCE_FILE SOURCE_SHA256 PUBLISHED_AT
+      - name: Generate the next live product structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/generate-generation.js --source versions/v2.html --output index.html --generation "$TARGET_GENERATION" --parent-generation "$PARENT_GENERATION" --seed "$GENERATION_SEED" --mission-id "$MISSION_ID" > /tmp/generation-manifest.json
+          export PUBLISHED_AT=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
           node <<'NODE'
           const fs = require('node:fs');
           const { execFileSync } = require('node:child_process');
-          const commits = execFileSync('git', ['log', '--pretty=format:%H', '-n', '5'], { encoding: 'utf8' })
-            .trim()
-            .split('\n')
-            .filter(Boolean);
-          const manifest = {
-            version: process.env.TARGET_VERSION,
-            generation: Number(process.env.TARGET_GENERATION),
-            source: process.env.SOURCE_FILE,
-            source_sha256: process.env.SOURCE_SHA256,
-            published_at: process.env.PUBLISHED_AT,
-            cache: `rev-${process.env.TARGET_VERSION}-${process.env.TARGET_GENERATION}`,
-            mission_id: process.env.MISSION_ID,
-            mutation: process.env.MUTATION,
-            commits,
-          };
-          fs.writeFileSync('version.json', `${JSON.stringify(manifest, null, 2)}\n`);
+          const generated = JSON.parse(fs.readFileSync('/tmp/generation-manifest.json', 'utf8'));
+          const commits = execFileSync('git', ['log', '--pretty=format:%H', '-n', '5'], { encoding: 'utf8' }).trim().split('\n').filter(Boolean);
+          fs.writeFileSync('version.json', `${JSON.stringify({ version: 'evolving', ...generated, published_at: process.env.PUBLISHED_AT, cache: `generation-${generated.generation}-${generated.seed}`, commits }, null, 2)}\n`);
           NODE
+          node scripts/smoke-fixture-check.js --generation "$TARGET_GENERATION" --parent-generation "$PARENT_GENERATION" --seed "$GENERATION_SEED" --mission-id "$MISSION_ID"
 
-          node scripts/smoke-fixture-check.js --target "$TARGET_VERSION" --mutation "$MUTATION"
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-
-      - name: Commit the production state
-        if: steps.publish.outputs.changed == 'true'
+      - name: Commit the generated production state
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add index.html version.json
-          git commit -m "chore(fixture): publish ${TARGET_VERSION} for ${MISSION_ID}"
+          git commit -m "chore(fixture): evolve generation ${TARGET_GENERATION} for ${MISSION_ID}"
           git push origin HEAD:main
 
       - name: Prove the Vercel production alias
@@ -165,85 +89,20 @@ jobs:
           set -euo pipefail
           node <<'NODE'
           const base = process.env.LIVE_URL.replace(/\/$/, '');
-          const expected = {
-            version: process.env.TARGET_VERSION,
-            generation: process.env.TARGET_GENERATION,
-            missionId: process.env.MISSION_ID,
-            mutation: process.env.MUTATION,
-          };
-          const deadline = Date.now() + 240_000;
+          const expected = { generation: Number(process.env.TARGET_GENERATION), parentGeneration: Number(process.env.PARENT_GENERATION), seed: process.env.GENERATION_SEED, missionId: process.env.MISSION_ID };
           const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
+          const deadline = Date.now() + 240_000;
           async function probe() {
             const nonce = `${Date.now()}-${Math.random()}`;
-            const markerResponse = await fetch(`${base}/version.json?nonce=${nonce}`, {
-              cache: 'no-store',
-              headers: { 'cache-control': 'no-cache' },
-            });
+            const markerResponse = await fetch(`${base}/version.json?nonce=${nonce}`, { cache: 'no-store' });
             if (!markerResponse.ok) return false;
             const marker = await markerResponse.json();
-            if (
-              marker.version !== expected.version ||
-              String(marker.generation) !== expected.generation ||
-              marker.mission_id !== expected.missionId
-              || marker.mutation !== expected.mutation
-            ) return false;
-
-            const pageResponse = await fetch(`${base}/?nonce=${nonce}`, {
-              cache: 'no-store',
-              headers: { 'cache-control': 'no-cache' },
-            });
-            if (!pageResponse.ok) return false;
-            const html = await pageResponse.text();
-            if (expected.mutation === 'selector-break') {
-              return !html.includes('product-price')
-                && !html.includes('money-widget__value')
-                && !html.includes('commerce-amount')
-                && !html.includes('listing-price__amount');
-            }
-            if (expected.version === 'v1') {
-              return html.includes('data-product-ref="Product/Code-123"')
-                && html.includes('<section class="identity"><div class="product-title"')
-                && html.includes('class="money-widget__value"')
-                && html.includes('<h2 class="stock-status">In stock</h2>')
-                && !html.includes('data-catalog-key=')
-                && !html.includes('class="catalog-heading"')
-                && !html.includes('commerce-amount');
-            }
-            if (expected.version === 'v2') {
-              return html.includes('data-catalog-key="Product/Code-123"')
-                && html.includes('<section class="identity"><div class="catalog-heading"')
-                && html.includes('<h2 class="stock-status">In stock</h2>')
-                && !html.includes('data-product-ref=')
-                && !html.includes('data-listing-id=')
-                && !html.includes('class="product-title"')
-                && !html.includes('class="listing-headline"')
-                && !html.includes('money-widget__value')
-                && !html.includes('listing-price__amount')
-                && html.includes('class="commerce-amount"');
-            }
-            return html.includes('data-listing-id="Product/Code-123"')
-              && html.includes('<section class="identity"><div class="listing-headline"')
-              && html.includes('<h2 class="stock-status">In stock</h2>')
-              && !html.includes('data-product-ref=')
-              && !html.includes('data-catalog-key=')
-              && !html.includes('class="product-title"')
-              && !html.includes('class="catalog-heading"')
-              && !html.includes('money-widget__value')
-              && !html.includes('commerce-amount')
-              && html.includes('class="listing-price__amount"');
+            if (marker.version !== 'evolving' || marker.generation !== expected.generation || marker.parent_generation !== expected.parentGeneration || marker.seed !== expected.seed || marker.mission_id !== expected.missionId) return false;
+            const response = await fetch(`${base}/?nonce=${nonce}`, { cache: 'no-store' });
+            if (!response.ok) return false;
+            const html = await response.text();
+            return html.includes(`name="polygraph-generation" content="${expected.generation}"`) && html.includes(`${marker.anchors.product_code.slice(1, -1)}="Product/Code-123"`) && html.includes(`class="${marker.anchors.title.slice(1)}"`) && html.includes(`class="${marker.anchors.price.slice(1)}"`) && html.includes('class="stock-status"');
           }
-
-          while (Date.now() < deadline) {
-            try {
-              if (await probe()) {
-                console.log(`Live fixture proved ${expected.version} generation ${expected.generation}.`);
-                process.exit(0);
-              }
-            } catch (error) {
-              console.log(`Waiting for Vercel: ${error.message}`);
-            }
-            await pause(3_000);
-          }
-          throw new Error(`Vercel did not prove ${expected.version} generation ${expected.generation} before timeout`);
+          while (Date.now() < deadline) { try { if (await probe()) process.exit(0); } catch (error) { console.log(`Waiting for Vercel: ${error.message}`); } await pause(3_000); }
+          throw new Error(`Vercel did not prove generation ${expected.generation} before timeout`);
           NODE
