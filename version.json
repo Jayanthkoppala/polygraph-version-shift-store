@@ -2,25 +2,25 @@
   "version": "evolving",
   "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484954,
-  "parent_generation": 1787443484953,
-  "seed": "pg_1787443484954_538bdd7607b242078b7c026c",
-  "mission_id": "538bdd76-07b2-4207-8b7c-026c5cf45895",
+  "generation": 1787443484955,
+  "parent_generation": 1787443484954,
+  "seed": "pg_1787443484955_df724a36f0bc467d9bf17983",
+  "mission_id": "df724a36-f0bc-467d-9bf1-7983997292d0",
   "generator": {
     "name": "evolve-store",
     "version": 5
   },
   "canonical_source": "versions/v2.html",
   "template_sha256": "cc971399aa190abe86bb252568c25d969febbf4bd57e9c8a87c89905217a7bd7",
-  "html_sha256": "cc4924d1273bb6a1d9f79564511cd887d7fb6cbcf2b68484e467aa97afc7abc1",
+  "html_sha256": "9bab6a8502b70043e18a283450845525908303f9be03733924fbb17c3a09e4eb",
   "variant": {
     "profile": "seeded-dom-text-elements",
-    "selector_digest": "d09bfe64ff1347ca"
+    "selector_digest": "19f2b9c33c27fdea"
   },
   "anchors": {
-    "product_code": "[data-pg-code-1b412f39fab2]",
-    "title": "[data-pg-title-7af54ec3e26b]",
-    "price": "[data-pg-price-ac90c804ac27]",
+    "product_code": "[data-pg-code-36e3e2a78eee]",
+    "title": "[data-pg-title-54a241df41fc]",
+    "price": "[data-pg-price-93fd8b70c613]",
     "availability": ".stock-status"
   },
   "invariants": {
@@ -33,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T16:47:05.000Z",
-  "cache": "generation-1787443484954-pg_1787443484954_538bdd7607b242078b7c026c",
+  "published_at": "2026-08-23T17:03:57.000Z",
+  "cache": "generation-1787443484955-pg_1787443484955_df724a36f0bc467d9bf17983",
   "commits": [
+    "ea6403b16f8d80fe65ab3ace12612fb62cfa95c7",
     "b5f47429770a50d49774d1eef8fd494b8fb39562",
     "a14685d58b553e1e9e1f65b8d733ac29caff8568",
     "2ec771639c965feeace24df5a489def66b58a339",
-    "498e2ebfdc3ce2cee9b5a89f2136a2d4640a9722",
-    "ed1f61da5c4edca80c057dcafcdb78dd6d45e0ed"
+    "498e2ebfdc3ce2cee9b5a89f2136a2d4640a9722"
   ]
 }
