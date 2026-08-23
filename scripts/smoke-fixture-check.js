@@ -61,6 +61,12 @@ if (!index.includes(selectorAttribute(price))) fail('generated price anchor is a
 if (!index.includes('class="stock-status"')) fail('stable availability control is absent');
 if (!index.includes(`name="polygraph-generation" content="${expectedGeneration}"`)) fail('generation marker absent from page');
 if (index.includes('data-catalog-key=') || index.includes('class="catalog-heading"') || index.includes('class="commerce-amount"')) fail('generated page retained canonical extraction anchors');
+for (const presentationHook of [
+  '.identity>:first-child{display:block;font-size:25px;line-height:1.24;font-weight:500;text-wrap:balance;margin:0 0 9px}',
+  '.pricebox>:nth-child(2){display:block;font-size:31px;letter-spacing:-1.5px;color:var(--red);margin:2px 0 7px}',
+]) {
+  if (!index.includes(presentationHook)) fail(`generated page lost presentation hook ${presentationHook}`);
+}
 pass('generated page preserves product meaning while changing exactly three extraction anchors');
 
 if (!fs.existsSync(path.join(root, '.github/workflows/switch-version.yml'))) fail('evolution workflow missing');

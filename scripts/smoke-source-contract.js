@@ -16,6 +16,12 @@ for (const value of ['Product/Code-123', 'Aster QuietWave Wireless Noise-Cancell
 for (const anchor of ['data-catalog-key=', 'class="catalog-heading"', 'class="commerce-amount"']) {
   if (!html.includes(anchor)) fail(`canonical fixture must retain its source anchor ${anchor}`);
 }
+for (const presentationHook of [
+  '.identity>:first-child{display:block;font-size:25px;line-height:1.24;font-weight:500;text-wrap:balance;margin:0 0 9px}',
+  '.pricebox>:nth-child(2){display:block;font-size:31px;letter-spacing:-1.5px;color:var(--red);margin:2px 0 7px}',
+]) {
+  if (!html.includes(presentationHook)) fail(`canonical fixture must retain presentation hook ${presentationHook}`);
+}
 pass('canonical source retains the stable product contract and source anchors');
 
 if (!fs.existsSync(generatorPath)) fail('seeded generator missing');

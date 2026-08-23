@@ -64,6 +64,16 @@ assert.equal(first.template_sha256, crypto.createHash('sha256').update(fs.readFi
 assert.equal(first.html_sha256, crypto.createHash('sha256').update(fs.readFileSync(one)).digest('hex'));
 assert.deepEqual(first.invariants.price, { value: 51.77, currency: 'GBP', symbol: '£' });
 
+// Presentation must not be coupled to the selector classes that a scraper
+// needs to relearn. These structural rules style every generated tag shape
+// (div, h1, section, p, output) without retaining canonical scraper classes.
+for (const hook of [
+  '.identity>:first-child{display:block;font-size:25px;line-height:1.24;font-weight:500;text-wrap:balance;margin:0 0 9px}',
+  '.pricebox>:nth-child(2){display:block;font-size:31px;letter-spacing:-1.5px;color:var(--red);margin:2px 0 7px}',
+]) {
+  assert.ok(html.includes(hook), `generated HTML must retain the stable presentation hook ${hook}`);
+}
+
 const parentState = path.join(temporary, 'parent-version.json');
 fs.writeFileSync(parentState, `${JSON.stringify({ generation: 42, anchors: first.anchors, variant: first.variant }, null, 2)}\n`);
 const child = JSON.parse(execFileSync(process.execPath, [generator,
@@ -78,5 +88,21 @@ const child = JSON.parse(execFileSync(process.execPath, [generator,
 ], { encoding: 'utf8' }));
 assert.notEqual(child.variant.profile, first.variant.profile, 'successive generation must choose a different structural profile');
 assert.notDeepEqual(child.anchors, first.anchors, 'successive generation must change extraction anchors');
+
+const expectedProfiles = new Set(['catalog-attributes', 'product-properties', 'offer-schema']);
+const observedProfiles = new Set([first.variant.profile]);
+for (let candidate = 0; candidate < 96 && observedProfiles.size < expectedProfiles.size; candidate++) {
+  const output = path.join(temporary, `profile-${candidate}.html`);
+  const manifest = generate(output, `pg_presentation_${candidate}`);
+  const profileHtml = fs.readFileSync(output, 'utf8');
+  observedProfiles.add(manifest.variant.profile);
+  for (const hook of [
+    '.identity>:first-child{display:block;font-size:25px;line-height:1.24;font-weight:500;text-wrap:balance;margin:0 0 9px}',
+    '.pricebox>:nth-child(2){display:block;font-size:31px;letter-spacing:-1.5px;color:var(--red);margin:2px 0 7px}',
+  ]) assert.ok(profileHtml.includes(hook), `${manifest.variant.profile} must keep ${hook}`);
+  assert.ok(!profileHtml.includes('class="catalog-heading"'), `${manifest.variant.profile} must still remove the canonical title extraction class`);
+  assert.ok(!profileHtml.includes('class="commerce-amount"'), `${manifest.variant.profile} must still remove the canonical price extraction class`);
+}
+assert.deepEqual([...observedProfiles].sort(), [...expectedProfiles].sort(), 'the presentation contract must cover every deterministic structural profile');
 
 console.log('✓ seeded generation contract is deterministic and preserves the product contract');
