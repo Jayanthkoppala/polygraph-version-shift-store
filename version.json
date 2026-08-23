@@ -1,22 +1,26 @@
 {
   "version": "evolving",
-  "schema_version": 2,
+  "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484941,
-  "parent_generation": 1787443484940,
-  "seed": "pg_1787443484941_575861c4cdd24eedbb76b5c1",
-  "mission_id": "575861c4-cdd2-4eed-bb76-b5c18b712adb",
+  "generation": 1787443484942,
+  "parent_generation": 1787443484941,
+  "seed": "pg_1787443484942_cf963be86ae148189f8ccc67",
+  "mission_id": "cf963be8-6ae1-4818-9f8c-cc6707d1a656",
   "generator": {
     "name": "evolve-store",
-    "version": 1
+    "version": 2
   },
   "canonical_source": "versions/v2.html",
   "template_sha256": "a173889dc9a3ccbf36793002a8cf3bf1450043a412b2d1975b20d6b83623f1ba",
-  "html_sha256": "878cc022ff77e7845ba4f2a7d754b5c4dd0e5a1f104d7d3b379ec8c669fb80b7",
+  "html_sha256": "a4c5ae85bfe3bb1c2341aa13c667abfbc68ccadad6293bba581cd95d19cc3d8a",
+  "variant": {
+    "profile": "catalog-attributes",
+    "selector_digest": "9415e9bd434cf1ba"
+  },
   "anchors": {
-    "product_code": "[data-pg-code-bf16197fca9a]",
-    "title": ".pg-title-41ae0f9e9100",
-    "price": ".pg-price-7943d58960d4",
+    "product_code": "[data-pg-code-cc84b692acc0]",
+    "title": "[data-pg-title-44b12ce3b3ff]",
+    "price": "[data-pg-price-71d439a9b90c]",
     "availability": ".stock-status"
   },
   "invariants": {
@@ -29,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T04:00:35.000Z",
-  "cache": "generation-1787443484941-pg_1787443484941_575861c4cdd24eedbb76b5c1",
+  "published_at": "2026-08-23T04:42:00.000Z",
+  "cache": "generation-1787443484942-pg_1787443484942_cf963be86ae148189f8ccc67",
   "commits": [
+    "58309fd083086087fce7452730f403320a7f6f02",
+    "6ad6f59cec71ddc76e16d906d96fb0eab4767dd8",
     "8e332df1f6a326f40266fad44df0650c1f9c694d",
     "62a7ad598492181617b70f1a7027122fea5eb36a",
-    "0d3a3f705ec7b50e182d924cec142a57af8073f1",
-    "42ae6236c95dd9a1842f717c562b26204f30698d",
-    "a1ccadb1cf5ee00a69903abf79dc341ce5d0e073"
+    "0d3a3f705ec7b50e182d924cec142a57af8073f1"
   ]
 }
