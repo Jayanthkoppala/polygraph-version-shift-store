@@ -2,25 +2,25 @@
   "version": "evolving",
   "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484945,
-  "parent_generation": 1787443484944,
-  "seed": "pg_1787443484945_ae1023c0d80c4aefaf56e029",
-  "mission_id": "ae1023c0-d80c-4aef-af56-e029aee4c4b5",
+  "generation": 1787443484946,
+  "parent_generation": 1787443484945,
+  "seed": "pg_1787443484946_0e2a4ba632d44234a980191c",
+  "mission_id": "0e2a4ba6-32d4-4234-a980-191cbd7da3ba",
   "generator": {
     "name": "evolve-store",
-    "version": 2
+    "version": 3
   },
   "canonical_source": "versions/v2.html",
   "template_sha256": "cc971399aa190abe86bb252568c25d969febbf4bd57e9c8a87c89905217a7bd7",
-  "html_sha256": "5dfc767d98e4ac533fda58136597ed8afa0bb7dbadbbda942b0cc79eacada12e",
+  "html_sha256": "57ce144320dc2f0b62fb6a1065e42796b72990ad77c6135498e61a3fab32f99c",
   "variant": {
-    "profile": "product-properties",
-    "selector_digest": "ebfe54417d514eb9"
+    "profile": "opaque-custom-elements",
+    "selector_digest": "959e99d71cee5784"
   },
   "anchors": {
-    "product_code": "[data-product-reference-0dea3e237133]",
-    "title": ".product-name-6d2f0f14ca1b",
-    "price": ".offer-value-73ee72f64467",
+    "product_code": "pg-code-319b0693acc4",
+    "title": "pg-title-108460831c08",
+    "price": "pg-price-f113964d2766",
     "availability": ".stock-status"
   },
   "invariants": {
@@ -33,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T13:22:39.000Z",
-  "cache": "generation-1787443484945-pg_1787443484945_ae1023c0d80c4aefaf56e029",
+  "published_at": "2026-08-23T13:52:53.000Z",
+  "cache": "generation-1787443484946-pg_1787443484946_0e2a4ba632d44234a980191c",
   "commits": [
+    "79519914b84907f69e6619af0b29d6cc933ef7fa",
+    "00b321ee44e9b5d07f4f2cbe565fc357a47d21e9",
     "f519796d08eecff44f125be530673b7695f93cee",
     "29a57d3aa35751d46df39ad05ea47d0749d4d3ce",
-    "42f70653948a0edc3b1e1f69638735f6dd36125f",
-    "d8a0a3b85a88fd4be6cce2c194ff012d7fc08dd3",
-    "58309fd083086087fce7452730f403320a7f6f02"
+    "42f70653948a0edc3b1e1f69638735f6dd36125f"
   ]
 }
