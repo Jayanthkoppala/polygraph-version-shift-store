@@ -2,9 +2,9 @@
   "version": "evolving",
   "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484943,
-  "parent_generation": 1787443484942,
-  "seed": "pg_1787443484943_f2e35eaccbd44bce8c88575b",
+  "generation": 1787443484944,
+  "parent_generation": 1787443484943,
+  "seed": "pg_1787443484944_f2e35eaccbd44bce8c88575b",
   "mission_id": "f2e35eac-cbd4-4bce-8c88-575b4eaf122d",
   "generator": {
     "name": "evolve-store",
@@ -12,15 +12,15 @@
   },
   "canonical_source": "versions/v2.html",
   "template_sha256": "cc971399aa190abe86bb252568c25d969febbf4bd57e9c8a87c89905217a7bd7",
-  "html_sha256": "85739550cb9d1cf445c10035c58e282f859345e35cf0d04695367d831e11b6e6",
+  "html_sha256": "5e5a99a6b044ef8a54c287d2ceac7d809c9c755b96e9c740532f84d970353c71",
   "variant": {
-    "profile": "product-properties",
-    "selector_digest": "bb06341007e0a1b5"
+    "profile": "catalog-attributes",
+    "selector_digest": "0d310e698d667e05"
   },
   "anchors": {
-    "product_code": "[data-product-reference-f9dafe9c28f1]",
-    "title": ".product-name-d51e930e5ccb",
-    "price": ".offer-value-c9bd268e303e",
+    "product_code": "[data-pg-code-0d595cb318cc]",
+    "title": "[data-pg-title-1dde0725727d]",
+    "price": "[data-pg-price-7974da8a3bb4]",
     "availability": ".stock-status"
   },
   "invariants": {
@@ -33,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T13:09:06.000Z",
-  "cache": "generation-1787443484943-pg_1787443484943_f2e35eaccbd44bce8c88575b",
+  "published_at": "2026-08-23T13:09:30.000Z",
+  "cache": "generation-1787443484944-pg_1787443484944_f2e35eaccbd44bce8c88575b",
   "commits": [
+    "29a57d3aa35751d46df39ad05ea47d0749d4d3ce",
     "42f70653948a0edc3b1e1f69638735f6dd36125f",
     "d8a0a3b85a88fd4be6cce2c194ff012d7fc08dd3",
     "58309fd083086087fce7452730f403320a7f6f02",
-    "6ad6f59cec71ddc76e16d906d96fb0eab4767dd8",
-    "8e332df1f6a326f40266fad44df0650c1f9c694d"
+    "6ad6f59cec71ddc76e16d906d96fb0eab4767dd8"
   ]
 }
