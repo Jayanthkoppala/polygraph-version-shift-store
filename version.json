@@ -2,9 +2,9 @@
   "version": "evolving",
   "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484949,
-  "parent_generation": 1787443484948,
-  "seed": "pg_1787443484949_04aa1e7f5d634d9f87c077df",
+  "generation": 1787443484950,
+  "parent_generation": 1787443484949,
+  "seed": "pg_1787443484950_04aa1e7f5d634d9f87c077df",
   "mission_id": "04aa1e7f-5d63-4d9f-87c0-77dfcdb93f4c",
   "generator": {
     "name": "evolve-store",
@@ -12,15 +12,15 @@
   },
   "canonical_source": "versions/v2.html",
   "template_sha256": "cc971399aa190abe86bb252568c25d969febbf4bd57e9c8a87c89905217a7bd7",
-  "html_sha256": "b86eeaeeea8eddabe2f7785afa0d48cbfe6dd9a7edb0fcfa9411c301af9440eb",
+  "html_sha256": "f9c1cc8dce77db4acc86cf8cfe7829d6d047ee6447a0ff9c471bddaa4d8b3876",
   "variant": {
     "profile": "opaque-attribute-elements",
-    "selector_digest": "d874a959505d6983"
+    "selector_digest": "52f491e1a763d968"
   },
   "anchors": {
-    "product_code": "[data-pg-code-242e84ad237a]",
-    "title": "[data-pg-title-87dd8f95811f]",
-    "price": "[data-pg-price-8b015e923e9e]",
+    "product_code": "[data-pg-code-778d1f91a6ff]",
+    "title": "[data-pg-title-f87fec33a383]",
+    "price": "[data-pg-price-c45b2a0a7a67]",
     "availability": ".stock-status"
   },
   "invariants": {
@@ -33,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T15:27:49.000Z",
-  "cache": "generation-1787443484949-pg_1787443484949_04aa1e7f5d634d9f87c077df",
+  "published_at": "2026-08-23T15:28:18.000Z",
+  "cache": "generation-1787443484950-pg_1787443484950_04aa1e7f5d634d9f87c077df",
   "commits": [
+    "925b29dd6765a2cf8daf28041050d3ad5ec95921",
     "5fcfc4a6bc02b6dd67964f1be9baca0b5227dc6b",
     "94d7379c237f368e078c5e736dbb9193371f3be8",
     "4fa3195391fe76271d6281c7bf9e5476ae58761a",
-    "7cb775813d45804f71b17ac86b532b2b4270aadf",
-    "79519914b84907f69e6619af0b29d6cc933ef7fa"
+    "7cb775813d45804f71b17ac86b532b2b4270aadf"
   ]
 }
