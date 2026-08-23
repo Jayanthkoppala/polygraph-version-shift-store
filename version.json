@@ -2,25 +2,25 @@
   "version": "evolving",
   "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484958,
-  "parent_generation": 1787443484957,
-  "seed": "pg_1787443484958_31894658aa8e4fa8a80fe164",
-  "mission_id": "31894658-aa8e-4fa8-a80f-e164881e5698",
+  "generation": 1787443484959,
+  "parent_generation": 1787443484958,
+  "seed": "pg_1787443484959_18157cb42b8b4c9a853b3853",
+  "mission_id": "18157cb4-2b8b-4c9a-853b-38536f29d822",
   "generator": {
     "name": "evolve-store",
     "version": 5
   },
   "canonical_source": "versions/v2.html",
   "template_sha256": "cc971399aa190abe86bb252568c25d969febbf4bd57e9c8a87c89905217a7bd7",
-  "html_sha256": "fbdafae9963f121414a20a9d1a8719fc7c323579c977698e6e0bac6545b8582b",
+  "html_sha256": "ced20274626d01bbacb44848cb0ecdf1f9172c42545f2a4d5adeac7cc4718fc9",
   "variant": {
     "profile": "seeded-dom-text-elements",
-    "selector_digest": "8cfa4403edeba634"
+    "selector_digest": "c508a70fefba3318"
   },
   "anchors": {
-    "product_code": "[data-pg-code-bc9f2572e42e]",
-    "title": "[data-pg-title-1e2a238277c2]",
-    "price": "[data-pg-price-fe945cac5ff2]",
+    "product_code": "[data-pg-code-d5ae02823a6d]",
+    "title": "[data-pg-title-d3ca20ce3cc5]",
+    "price": "[data-pg-price-1da2c8ccdc26]",
     "availability": ".stock-status"
   },
   "invariants": {
@@ -33,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T17:58:33.000Z",
-  "cache": "generation-1787443484958-pg_1787443484958_31894658aa8e4fa8a80fe164",
+  "published_at": "2026-08-23T18:41:02.000Z",
+  "cache": "generation-1787443484959-pg_1787443484959_18157cb42b8b4c9a853b3853",
   "commits": [
+    "578817f4dd07a934bd2343a4c2527bb44467d6f4",
     "89eba59651d2c0fbda3c57dad16736685a3def67",
     "b737b23ae18d0119f39954a9015c1d5e4e8be674",
     "accb95d7545643065fbd4838323efa5d9c0ef896",
-    "ea6403b16f8d80fe65ab3ace12612fb62cfa95c7",
-    "b5f47429770a50d49774d1eef8fd494b8fb39562"
+    "ea6403b16f8d80fe65ab3ace12612fb62cfa95c7"
   ]
 }
