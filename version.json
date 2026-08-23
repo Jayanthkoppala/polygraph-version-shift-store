@@ -2,25 +2,25 @@
   "version": "evolving",
   "schema_version": 3,
   "contract_version": "polygraph-owned-product/v1",
-  "generation": 1787443484955,
-  "parent_generation": 1787443484954,
-  "seed": "pg_1787443484955_df724a36f0bc467d9bf17983",
-  "mission_id": "df724a36-f0bc-467d-9bf1-7983997292d0",
+  "generation": 1787443484956,
+  "parent_generation": 1787443484955,
+  "seed": "pg_1787443484956_8c8c6decba3d46509516185f",
+  "mission_id": "8c8c6dec-ba3d-4650-9516-185fe92df87b",
   "generator": {
     "name": "evolve-store",
     "version": 5
   },
   "canonical_source": "versions/v2.html",
   "template_sha256": "cc971399aa190abe86bb252568c25d969febbf4bd57e9c8a87c89905217a7bd7",
-  "html_sha256": "9bab6a8502b70043e18a283450845525908303f9be03733924fbb17c3a09e4eb",
+  "html_sha256": "fa8eadedd52e28731ea94a5329518df3c04a380517e207b3baa00111b385ef5a",
   "variant": {
     "profile": "seeded-dom-text-elements",
-    "selector_digest": "19f2b9c33c27fdea"
+    "selector_digest": "afccf06c958b0522"
   },
   "anchors": {
-    "product_code": "[data-pg-code-36e3e2a78eee]",
-    "title": "[data-pg-title-54a241df41fc]",
-    "price": "[data-pg-price-93fd8b70c613]",
+    "product_code": "[data-pg-code-4e5c6197260c]",
+    "title": "[data-pg-title-0b74144b5827]",
+    "price": "[data-pg-price-751d5ee961ea]",
     "availability": ".stock-status"
   },
   "invariants": {
@@ -33,13 +33,13 @@
     },
     "availability": "In stock"
   },
-  "published_at": "2026-08-23T17:03:57.000Z",
-  "cache": "generation-1787443484955-pg_1787443484955_df724a36f0bc467d9bf17983",
+  "published_at": "2026-08-23T17:50:50.000Z",
+  "cache": "generation-1787443484956-pg_1787443484956_8c8c6decba3d46509516185f",
   "commits": [
+    "accb95d7545643065fbd4838323efa5d9c0ef896",
     "ea6403b16f8d80fe65ab3ace12612fb62cfa95c7",
     "b5f47429770a50d49774d1eef8fd494b8fb39562",
     "a14685d58b553e1e9e1f65b8d733ac29caff8568",
-    "2ec771639c965feeace24df5a489def66b58a339",
-    "498e2ebfdc3ce2cee9b5a89f2136a2d4640a9722"
+    "2ec771639c965feeace24df5a489def66b58a339"
   ]
 }
