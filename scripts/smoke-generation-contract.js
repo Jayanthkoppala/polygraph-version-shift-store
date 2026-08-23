@@ -56,6 +56,10 @@ for (const oldAnchor of ['data-catalog-key=', 'class="catalog-heading"', 'class=
 }
 assert.ok(html.includes('class="stock-status"'), 'availability control must stay stable');
 assert.ok(html.includes('name="polygraph-generation" content="42"'), 'page must expose its generation marker');
-assert.equal(first.source_sha256, crypto.createHash('sha256').update(fs.readFileSync(canonical)).digest('hex'));
+assert.equal(first.schema_version, 2);
+assert.equal(first.contract_version, 'polygraph-owned-product/v1');
+assert.equal(first.template_sha256, crypto.createHash('sha256').update(fs.readFileSync(canonical)).digest('hex'));
+assert.equal(first.html_sha256, crypto.createHash('sha256').update(fs.readFileSync(one)).digest('hex'));
+assert.deepEqual(first.invariants.price, { value: 51.77, currency: 'GBP', symbol: '£' });
 
 console.log('✓ seeded generation contract is deterministic and preserves the product contract');

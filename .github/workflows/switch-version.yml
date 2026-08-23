@@ -46,6 +46,7 @@ jobs:
           fetch-depth: 10
 
       - name: Validate the requested evolution
+        id: validate
         shell: bash
         run: |
           set -euo pipefail
@@ -55,10 +56,20 @@ jobs:
           if [[ -z "$MISSION_ID" ]]; then echo "mission_id is required"; exit 1; fi
           if [[ -z "$LIVE_URL" ]]; then echo "Repository variable POLYGRAPH_FIXTURE_URL is required"; exit 1; fi
           CURRENT_GENERATION=$(node -e "const m=require('./version.json');process.stdout.write(String(m.generation))")
+          CURRENT_PARENT=$(node -e "const m=require('./version.json');process.stdout.write(String(m.parent_generation ?? ''))")
+          CURRENT_SEED=$(node -e "const m=require('./version.json');process.stdout.write(String(m.seed ?? ''))")
+          CURRENT_MISSION=$(node -e "const m=require('./version.json');process.stdout.write(String(m.mission_id ?? ''))")
+          if [[ "$TARGET_GENERATION" == "$CURRENT_GENERATION" && "$PARENT_GENERATION" == "$CURRENT_PARENT" && "$GENERATION_SEED" == "$CURRENT_SEED" && "$MISSION_ID" == "$CURRENT_MISSION" ]]; then
+            echo "This exact generation is already current; continuing to deployment proof."
+            echo "already_current=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if [[ "$PARENT_GENERATION" != "$CURRENT_GENERATION" ]]; then echo "parent_generation must match live generation"; exit 1; fi
-          if (( TARGET_GENERATION <= CURRENT_GENERATION )); then echo "generation must advance"; exit 1; fi
+          if (( TARGET_GENERATION != CURRENT_GENERATION + 1 )); then echo "generation must advance exactly once"; exit 1; fi
+          echo "already_current=false" >> "$GITHUB_OUTPUT"
 
       - name: Generate the next live product structure
+        if: steps.validate.outputs.already_current != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -74,6 +85,7 @@ jobs:
           node scripts/smoke-fixture-check.js --generation "$TARGET_GENERATION" --parent-generation "$PARENT_GENERATION" --seed "$GENERATION_SEED" --mission-id "$MISSION_ID"
 
       - name: Commit the generated production state
+        if: steps.validate.outputs.already_current != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -88,6 +100,7 @@ jobs:
         run: |
           set -euo pipefail
           node <<'NODE'
+          const crypto = require('node:crypto');
           const base = process.env.LIVE_URL.replace(/\/$/, '');
           const expected = { generation: Number(process.env.TARGET_GENERATION), parentGeneration: Number(process.env.PARENT_GENERATION), seed: process.env.GENERATION_SEED, missionId: process.env.MISSION_ID };
           const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -101,7 +114,13 @@ jobs:
             const response = await fetch(`${base}/?nonce=${nonce}`, { cache: 'no-store' });
             if (!response.ok) return false;
             const html = await response.text();
-            return html.includes(`name="polygraph-generation" content="${expected.generation}"`) && html.includes(`${marker.anchors.product_code.slice(1, -1)}="Product/Code-123"`) && html.includes(`class="${marker.anchors.title.slice(1)}"`) && html.includes(`class="${marker.anchors.price.slice(1)}"`) && html.includes('class="stock-status"');
+            return marker.schema_version === 2
+              && crypto.createHash('sha256').update(html).digest('hex') === marker.html_sha256
+              && html.includes(`name="polygraph-generation" content="${expected.generation}"`)
+              && html.includes(`${marker.anchors.product_code.slice(1, -1)}="Product/Code-123"`)
+              && html.includes(`class="${marker.anchors.title.slice(1)}"`)
+              && html.includes(`class="${marker.anchors.price.slice(1)}"`)
+              && html.includes('class="stock-status"');
           }
           while (Date.now() < deadline) { try { if (await probe()) process.exit(0); } catch (error) { console.log(`Waiting for Vercel: ${error.message}`); } await pause(3_000); }
           throw new Error(`Vercel did not prove generation ${expected.generation} before timeout`);

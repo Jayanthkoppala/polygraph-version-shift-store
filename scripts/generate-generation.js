@@ -47,21 +47,6 @@ const anchors = {
   price: `.pg-price-${digest(seed, 'price')}`,
   availability: '.stock-status',
 };
-const manifest = {
-  generation,
-  parent_generation: parentGeneration,
-  seed,
-  mission_id: missionId,
-  canonical_source: path.relative(process.cwd(), source).replaceAll('\\', '/'),
-  source_sha256: sourceSha256,
-  anchors,
-};
-
-if (manifestOnly) {
-  process.stdout.write(`${JSON.stringify(manifest)}\n`);
-  process.exit(0);
-}
-
 let html = sourceHtml
   .replace('class="catalog-heading"', `class="${anchors.title.slice(1)}"`)
   .replace('class="commerce-amount"', `class="${anchors.price.slice(1)}"`)
@@ -79,6 +64,29 @@ const marker = [
 html = html.replace('</head>', `${marker}</head>`);
 if (!html.includes(`name="polygraph-generation" content="${generation}"`)) throw new Error('could not add fixture generation marker');
 
-fs.mkdirSync(path.dirname(output), { recursive: true });
-fs.writeFileSync(output, html);
+const productTitle = 'Aster QuietWave Wireless Noise-Cancelling Headphones, 40-hour Battery, Midnight Blue';
+const manifest = {
+  schema_version: 2,
+  contract_version: 'polygraph-owned-product/v1',
+  generation,
+  parent_generation: parentGeneration,
+  seed,
+  mission_id: missionId,
+  generator: { name: 'evolve-store', version: 1 },
+  canonical_source: path.relative(process.cwd(), source).replaceAll('\\', '/'),
+  template_sha256: sourceSha256,
+  html_sha256: crypto.createHash('sha256').update(html).digest('hex'),
+  anchors,
+  invariants: {
+    product_code: 'Product/Code-123',
+    title_sha256: crypto.createHash('sha256').update(productTitle).digest('hex'),
+    price: { value: 51.77, currency: 'GBP', symbol: '£' },
+    availability: 'In stock',
+  },
+};
+
+if (!manifestOnly) {
+  fs.mkdirSync(path.dirname(output), { recursive: true });
+  fs.writeFileSync(output, html);
+}
 process.stdout.write(`${JSON.stringify(manifest)}\n`);
